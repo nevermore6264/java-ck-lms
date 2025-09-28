@@ -1,57 +1,125 @@
 package citd.nhom99.ck.view.admin;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+
 import citd.nhom99.ck.controller.TeacherController;
-import citd.nhom99.ck.model.constant.Gender;
-import citd.nhom99.ck.model.constant.Role;
 import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.User;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.List;
+import citd.nhom99.ck.model.constant.Gender;
+import citd.nhom99.ck.model.constant.Role;
 
 public class TeacherManagementPanel extends JPanel {
     private final TeacherController teacherController = new TeacherController();
     private JTable teacherTable;
     private DefaultTableModel tableModel;
+    private JTextField searchField;
+    private List<Teacher> allTeachers;
 
     public TeacherManagementPanel() {
-        JPanel teacherManagementPanel = new JPanel(new BorderLayout());
-        teacherManagementPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        JPanel headerPanel = createHeaderPanel();
-        teacherManagementPanel.add(headerPanel, BorderLayout.NORTH);
-
-        JPanel tablePanel = createTablePanel();
-        teacherManagementPanel.add(tablePanel, BorderLayout.CENTER);
-
-        JPanel buttonPanel = createButtonPanel();
-        teacherManagementPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        loadTeacherData();
-
         setLayout(new BorderLayout());
-        add(teacherManagementPanel, BorderLayout.CENTER);
+        setBackground(new Color(248, 249, 250));
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Tạo header panel
+        JPanel headerPanel = createHeaderPanel();
+        add(headerPanel, BorderLayout.NORTH);
+
+        // Tạo table panel
+        JPanel tablePanel = createTablePanel();
+        add(tablePanel, BorderLayout.CENTER);
+
+        // Tạo button panel
+        JPanel buttonPanel = createButtonPanel();
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Load dữ liệu ban đầu
+        loadTeacherData();
     }
 
     private JPanel createHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        headerPanel.setBackground(new Color(248, 249, 250));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+
+        // Title panel
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titlePanel.setBackground(new Color(248, 249, 250));
+        
+        JLabel titleLabel = new JLabel("Quản lý Giáo viên");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(52, 58, 64));
+        titlePanel.add(titleLabel);
 
         // Search panel
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        searchPanel.setBackground(new Color(248, 249, 250));
+        
         JLabel searchLabel = new JLabel("Tìm kiếm:");
-        JTextField searchField = new JTextField(20);
-        JButton searchButton = new JButton("Tìm");
-
-//        searchButton.addActionListener(e -> performSearch());
-//        searchField.addActionListener(e -> performSearch());
+        searchLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        searchLabel.setForeground(new Color(60, 60, 60));
+        
+        searchField = new JTextField(20);
+        searchField.setFont(new Font("Arial", Font.PLAIN, 14));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        
+        JButton searchButton = new JButton("Tìm kiếm");
+        searchButton.setFont(new Font("Arial", Font.BOLD, 12));
+        searchButton.setBackground(new Color(52, 144, 220));
+        searchButton.setForeground(Color.WHITE);
+        searchButton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        searchButton.setFocusPainted(false);
+        searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect
+        searchButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                searchButton.setBackground(new Color(41, 128, 185));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                searchButton.setBackground(new Color(52, 144, 220));
+            }
+        });
+        
+        // Add search functionality
+        searchButton.addActionListener(e -> performSearch());
+        searchField.addActionListener(e -> performSearch());
 
         searchPanel.add(searchLabel);
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
 
+        headerPanel.add(titlePanel, BorderLayout.WEST);
         headerPanel.add(searchPanel, BorderLayout.EAST);
 
         return headerPanel;
@@ -59,19 +127,43 @@ public class TeacherManagementPanel extends JPanel {
 
     private JPanel createTablePanel() {
         JPanel tablePanel = new JPanel(new BorderLayout());
+        tablePanel.setBackground(new Color(248, 249, 250));
+        tablePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
 
         // Tạo table model với các cột
         String[] columnNames = {
                 "ID", "Mã GV", "Họ và tên", "Email", "Số điện thoại", "Giới tính", "Lớp chủ nhiệm", "Môn dạy"
         };
 
-        tableModel = new DefaultTableModel(columnNames, 0);
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Không cho phép chỉnh sửa trực tiếp trong table
+            }
+        };
 
         teacherTable = new JTable(tableModel);
         teacherTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        teacherTable.setRowHeight(35);
+        teacherTable.setFont(new Font("Arial", Font.PLAIN, 13));
+        teacherTable.setGridColor(new Color(220, 220, 220));
+        teacherTable.setShowGrid(true);
+        teacherTable.setIntercellSpacing(new Dimension(0, 1));
+        
+        // Customize table header
+        JTableHeader header = teacherTable.getTableHeader();
+        header.setFont(new Font("Arial", Font.BOLD, 14));
+        header.setBackground(new Color(52, 58, 64));
+        header.setForeground(Color.WHITE);
+        header.setPreferredSize(new Dimension(header.getWidth(), 40));
 
         JScrollPane scrollPane = new JScrollPane(teacherTable);
-        scrollPane.setPreferredSize(new Dimension(800, 400));
+        scrollPane.setPreferredSize(new Dimension(1000, 500));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
@@ -79,27 +171,15 @@ public class TeacherManagementPanel extends JPanel {
     }
 
     private JPanel createButtonPanel() {
-        JButton addButton, editButton, deleteButton, refreshButton;
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
+        buttonPanel.setBackground(new Color(248, 249, 250));
 
-        addButton = new JButton("Thêm giáo viên");
-        editButton = new JButton("Sửa thông tin");
-        deleteButton = new JButton("Xóa giáo viên");
-        refreshButton = new JButton("Làm mới");
+        JButton addButton = createStyledButton("Thêm giáo viên", new Color(46, 204, 113));
+        JButton editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
+        JButton deleteButton = createStyledButton("Xóa giáo viên", new Color(231, 76, 60));
+        JButton refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
-        // Thiết lập màu sắc cho buttons
-        addButton.setBackground(new Color(46, 204, 113));
-        addButton.setForeground(Color.WHITE);
-
-        editButton.setBackground(new Color(52, 152, 219));
-        editButton.setForeground(Color.WHITE);
-
-        deleteButton.setBackground(new Color(231, 76, 60));
-        deleteButton.setForeground(Color.WHITE);
-
-        refreshButton.setBackground(new Color(149, 165, 166));
-        refreshButton.setForeground(Color.WHITE);
-
+        // Thêm action listeners
         addButton.addActionListener(e -> handleAddTeacher());
         editButton.addActionListener(e -> handleEditTeacher());
         deleteButton.addActionListener(e -> handleDeleteTeacher());
@@ -111,6 +191,36 @@ public class TeacherManagementPanel extends JPanel {
         buttonPanel.add(refreshButton);
 
         return buttonPanel;
+    }
+
+    private JButton createStyledButton(String text, Color backgroundColor) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 13));
+        button.setBackground(backgroundColor);
+        button.setForeground(Color.WHITE);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effect
+        Color hoverColor = new Color(
+            Math.max(0, backgroundColor.getRed() - 20),
+            Math.max(0, backgroundColor.getGreen() - 20),
+            Math.max(0, backgroundColor.getBlue() - 20)
+        );
+        
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(hoverColor);
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(backgroundColor);
+            }
+        });
+        
+        return button;
     }
 
     private void handleAddTeacher() {
@@ -230,32 +340,58 @@ public class TeacherManagementPanel extends JPanel {
     }
 
     private void loadTeacherData() {
-        // Xóa dữ liệu cũ
         tableModel.setRowCount(0);
 
         try {
-            List<Teacher> teachers = teacherController.getAllTeachers();
-            for (Teacher teacher : teachers) {
-                if (teacher.getUser() != null) {
-
-                    Object[] rowData = {
-                            teacher.getUser().getUserId(),
-                            teacher.getTeacherCode(),
-                            teacher.getUser().getFullName(),
-                            teacher.getUser().getEmail(),
-                            teacher.getUser().getPhoneNumber(),
-                            teacher.getUser().getGender(),
-                            teacher.getClassroomId() != 0 ? teacher.getClassroomId() : "Không chủ nhiệm",
-                            teacher.getSubjectId()
-                    };
-                    tableModel.addRow(rowData);
-                }
-            }
+            allTeachers = teacherController.getAllTeachers();
+            displayTeachers(allTeachers);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Lỗi khi tải dữ liệu giáo viên: " + e.getMessage(),
                     "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void displayTeachers(List<Teacher> teachers) {
+        tableModel.setRowCount(0);
+        for (Teacher teacher : teachers) {
+            if (teacher.getUser() != null) {
+                Object[] rowData = {
+                        teacher.getUser().getUserId(),
+                        teacher.getTeacherCode(),
+                        teacher.getUser().getFullName(),
+                        teacher.getUser().getEmail(),
+                        teacher.getUser().getPhoneNumber(),
+                        teacher.getUser().getGender(),
+                        teacher.getClassroomId() != 0 ? teacher.getClassroomId() : "Không chủ nhiệm",
+                        teacher.getSubjectId()
+                };
+                tableModel.addRow(rowData);
+            }
+        }
+    }
+
+    private void performSearch() {
+        if (allTeachers == null) return;
+        
+        String searchText = searchField.getText().toLowerCase().trim();
+        if (searchText.isEmpty()) {
+            displayTeachers(allTeachers);
+            return;
+        }
+
+        List<Teacher> filteredTeachers = allTeachers.stream()
+                .filter(teacher -> 
+                    teacher.getUser() != null && (
+                        teacher.getUser().getFullName().toLowerCase().contains(searchText) ||
+                        teacher.getTeacherCode().toLowerCase().contains(searchText) ||
+                        teacher.getUser().getEmail().toLowerCase().contains(searchText) ||
+                        teacher.getUser().getPhoneNumber().toLowerCase().contains(searchText)
+                    )
+                )
+                .collect(java.util.stream.Collectors.toList());
+
+        displayTeachers(filteredTeachers);
     }
 }
