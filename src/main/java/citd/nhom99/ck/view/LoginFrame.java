@@ -60,7 +60,7 @@ public class LoginFrame extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
         
         // Title
-        JLabel titleLabel = new JLabel("Hệ thống Quản lý Học tập");
+        JLabel titleLabel = new JLabel("Hệ thống quản lý lớp học");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
