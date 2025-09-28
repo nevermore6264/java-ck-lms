@@ -134,11 +134,20 @@ public class ClassroomManagementPanel extends JPanel {
     private void displayClassrooms(List<Classroom> classrooms) {
         tableModel.setRowCount(0);
         for (Classroom classroom : classrooms) {
+            // Get teacher name
+            String teacherName = "Chưa có GVCN";
+            if (classroom.getTeacher() != null && classroom.getTeacher().getUser() != null) {
+                teacherName = classroom.getTeacher().getUser().getFullName();
+            }
+            
+            // Get student count
+            int studentCount = classroom.getStudents() != null ? classroom.getStudents().size() : 0;
+            
             Object[] rowData = {
                     classroom.getClassId(),
                     classroom.getClassName(),
-                    classroom.getTeacherId(),
-                    classroom.getStudents().size()
+                    teacherName,
+                    studentCount
             };
             tableModel.addRow(rowData);
         }

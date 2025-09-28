@@ -49,7 +49,7 @@ public class MainContentPanel extends JPanel {
     }
 
     private void initializePanels() {
-        contentPanel.add(new HomePanel(), "Trang chủ");
+        contentPanel.add(new HomePanel(user, this::updateMainContent), "Trang chủ");
         contentPanel.add(new AccountPanel(user, controller), "Tài khoản");
         
         // Admin panels

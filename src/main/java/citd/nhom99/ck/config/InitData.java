@@ -7,26 +7,41 @@ import java.sql.Statement;
 public class InitData {
 
     public static void initializeSampleData() {
-        System.out.println("Initializing sample data...");
+        System.out.println("Checking if database needs sample data...");
         
         try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement()) {
             
-            insertSampleUsers(stmt);
+            // Check if database already has data
+            boolean hasUsers = false;
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as count FROM users")) {
+                if (rs.next() && rs.getInt("count") > 0) {
+                    hasUsers = true;
+                }
+            }
             
-            insertSampleSubjects(stmt);
-            
-            insertSampleClassrooms(stmt);
-            
-            insertSampleTeachers(stmt);
-            
-            insertSampleStudents(stmt);
-            
-            insertSampleSchedules(stmt);
-            
-            insertSampleStudentGrades(stmt);
-            
-            System.out.println("Sample data initialized successfully.");
+            if (hasUsers) {
+                System.out.println("Database already has data. Skipping sample data initialization.");
+                System.out.println("Using existing data from database.");
+        } else {
+                System.out.println("Database is empty. Initializing sample data...");
+                
+                insertSampleUsers(stmt);
+                
+                insertSampleSubjects(stmt);
+                
+                insertSampleClassrooms(stmt);
+                
+                insertSampleTeachers(stmt);
+                
+                insertSampleStudents(stmt);
+                
+                insertSampleSchedules(stmt);
+                
+                insertSampleStudentGrades(stmt);
+                
+                System.out.println("Sample data initialized successfully.");
+            }
             
             System.out.println("\n=== DEBUG: Checking created data ===");
             

@@ -1,10 +1,10 @@
 package citd.nhom99.ck.controller;
 
-import citd.nhom99.ck.model.User;
-import citd.nhom99.ck.model.Student;
-import citd.nhom99.ck.model.dao.StudentDAO;
-
 import java.util.List;
+
+import citd.nhom99.ck.model.Student;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.dao.StudentDAO;
 
 public class StudentController {
     private final StudentDAO studentDAO = new StudentDAO();
@@ -24,6 +24,11 @@ public class StudentController {
     public void updateStudent(User student) {
         studentDAO.updateStudent(student);
         System.out.println("Controller: Updating student info for student ");
+    }
+    
+    public void updateStudentClassroom(int studentId, int classroomId) {
+        studentDAO.updateStudentClassroom(studentId, classroomId);
+        System.out.println("Controller: Updated classroom for student " + studentId);
     }
 
     public void deleteStudent(int id) {

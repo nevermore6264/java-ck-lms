@@ -86,6 +86,27 @@ public class StudentDAO {
     public void updateStudent(User student) {
         System.out.println("DAO: Update student" + student.toString());
     }
+    
+    public void updateStudentClassroom(int studentId, int classroomId) {
+        String sql = "UPDATE students SET class_id = ? WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, classroomId);
+            pstmt.setInt(2, studentId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("DAO: Updated classroom for student " + studentId + " to classroom " + classroomId);
+            } else {
+                System.out.println("DAO: No student found with ID " + studentId);
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("DAO: Error updating student classroom: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     public void deleteStudent(int userId) {
         userDAO.deleteUser(userId);

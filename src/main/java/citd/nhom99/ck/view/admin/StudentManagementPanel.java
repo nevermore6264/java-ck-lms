@@ -33,6 +33,7 @@ import citd.nhom99.ck.model.Student;
 import citd.nhom99.ck.model.User;
 import citd.nhom99.ck.model.constant.Gender;
 import citd.nhom99.ck.model.constant.Role;
+import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.UserDAO;
 
 public class StudentManagementPanel extends JPanel {
@@ -198,6 +199,7 @@ public class StudentManagementPanel extends JPanel {
         JButton addButton = createStyledButton("Thêm học sinh", new Color(46, 204, 113));
         JButton editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
         JButton deleteButton = createStyledButton("Xóa học sinh", new Color(231, 76, 60));
+        JButton assignClassButton = createStyledButton("Phân lớp", new Color(230, 126, 34));
         JButton viewDetailsButton = createStyledButton("Xem chi tiết", new Color(155, 89, 182));
         JButton refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
@@ -205,12 +207,14 @@ public class StudentManagementPanel extends JPanel {
         addButton.addActionListener(e -> handleCreateStudent());
         editButton.addActionListener(e -> handleEditStudent());
         deleteButton.addActionListener(e -> handleDeleteStudent());
+        assignClassButton.addActionListener(e -> handleAssignClass());
         viewDetailsButton.addActionListener(e -> handleViewStudentDetails());
         refreshButton.addActionListener(e -> loadStudentData());
 
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(assignClassButton);
         buttonPanel.add(viewDetailsButton);
         buttonPanel.add(refreshButton);
 
@@ -770,6 +774,122 @@ public class StudentManagementPanel extends JPanel {
                 "Chi tiết học sinh", 
                 JOptionPane.INFORMATION_MESSAGE
             );
+        }
+    }
+
+    private void handleAssignClass() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để phân lớp!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedRow >= 0 && selectedRow < allStudents.size()) {
+            Student student = allStudents.get(selectedRow);
+            
+            // Create assign class dialog
+            JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Phân lớp cho học sinh", true);
+            dialog.setSize(400, 300);
+            dialog.setLocationRelativeTo(this);
+            dialog.setLayout(new BorderLayout());
+            
+            // Header
+            JPanel headerPanel = new JPanel();
+            headerPanel.setBackground(new Color(52, 58, 64));
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+            
+            JLabel titleLabel = new JLabel("Phân lớp cho: " + student.getUser().getFullName());
+            titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+            titleLabel.setForeground(Color.WHITE);
+            headerPanel.add(titleLabel);
+            
+            // Content panel
+            JPanel contentPanel = new JPanel(new java.awt.GridBagLayout());
+            contentPanel.setBackground(Color.WHITE);
+            contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            
+            java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+            gbc.insets = new java.awt.Insets(10, 10, 10, 10);
+            gbc.anchor = java.awt.GridBagConstraints.WEST;
+            
+            // Current class info
+            gbc.gridx = 0; gbc.gridy = 0;
+            contentPanel.add(createStyledLabel("Lớp hiện tại:"), gbc);
+            
+            gbc.gridx = 1;
+            String currentClass = student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa phân lớp";
+            JLabel currentClassLabel = new JLabel(currentClass);
+            currentClassLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            currentClassLabel.setForeground(new Color(100, 100, 100));
+            contentPanel.add(currentClassLabel, gbc);
+            
+            // New class selection
+            gbc.gridx = 0; gbc.gridy = 1;
+            contentPanel.add(createStyledLabel("Lớp mới:"), gbc);
+            
+            gbc.gridx = 1; gbc.fill = java.awt.GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+            
+            // Load available classrooms
+            ClassroomDAO classroomDAO = new ClassroomDAO();
+            java.util.List<citd.nhom99.ck.model.Classroom> classrooms = classroomDAO.getAllClassrooms();
+            String[] classNames = new String[classrooms.size()];
+            for (int i = 0; i < classrooms.size(); i++) {
+                classNames[i] = classrooms.get(i).getClassName();
+            }
+            
+            JComboBox<String> classComboBox = createStyledComboBox(classNames);
+            contentPanel.add(classComboBox, gbc);
+            
+            // Button panel
+            JPanel buttonPanel = new JPanel(new java.awt.FlowLayout());
+            buttonPanel.setBackground(Color.WHITE);
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+            
+            JButton assignButton = createStyledButton("Phân lớp", new Color(46, 204, 113));
+            JButton cancelButton = createStyledButton("Hủy", new Color(149, 165, 166));
+            
+            assignButton.addActionListener(e -> {
+                try {
+                    String selectedClassName = (String) classComboBox.getSelectedItem();
+                    if (selectedClassName != null) {
+                        // Find classroom by name
+                        citd.nhom99.ck.model.Classroom selectedClassroom = null;
+                        for (citd.nhom99.ck.model.Classroom classroom : classrooms) {
+                            if (classroom.getClassName().equals(selectedClassName)) {
+                                selectedClassroom = classroom;
+                                break;
+                            }
+                        }
+                        
+                        if (selectedClassroom != null) {
+                            // Update student's classroom in database
+                            studentController.updateStudentClassroom(student.getUser().getUserId(), selectedClassroom.getClassId());
+                            
+                            // Update student object
+                            student.setClassroomId(selectedClassroom.getClassId());
+                            student.setClassroom(selectedClassroom);
+                            
+                            JOptionPane.showMessageDialog(dialog, "Phân lớp thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                            dialog.dispose();
+                            loadStudentData(); // Refresh the table
+                        }
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(dialog, "Lỗi khi phân lớp: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            });
+            
+            cancelButton.addActionListener(e -> dialog.dispose());
+            
+            buttonPanel.add(assignButton);
+            buttonPanel.add(cancelButton);
+            
+            dialog.add(headerPanel, BorderLayout.NORTH);
+            dialog.add(contentPanel, BorderLayout.CENTER);
+            dialog.add(buttonPanel, BorderLayout.SOUTH);
+            
+            dialog.setVisible(true);
         }
     }
 }
