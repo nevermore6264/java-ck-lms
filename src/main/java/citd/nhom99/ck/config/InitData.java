@@ -24,6 +24,8 @@ public class InitData {
             
             insertSampleSchedules(stmt);
             
+            insertSampleStudentGrades(stmt);
+            
             System.out.println("Sample data initialized successfully.");
             
             System.out.println("Debug: Checking created users...");
@@ -59,10 +61,21 @@ public class InitData {
     }
     
     private static void insertSampleUsers(Statement stmt) throws Exception {
-        String adminSql = "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (1, 'admin', 'admin', 'Nguyễn Văn Admin', '0123456789', 'admin@school.edu.vn', 'MALE', 'ADMIN')";
-        stmt.execute(adminSql);
+        String[] users = {
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (1, 'admin', 'admin', 'Nguyễn Văn Admin', '0123456789', 'admin@school.edu.vn', 'MALE', 'ADMIN')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (2, 'teacher1', 'teacher1', 'Nguyễn Văn Giáo viên 1', '0123456780', 'teacher1@school.edu.vn', 'MALE', 'TEACHER')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (3, 'teacher2', 'teacher2', 'Trần Thị Giáo viên 2', '0123456781', 'teacher2@school.edu.vn', 'FEMALE', 'TEACHER')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (4, 'teacher3', 'teacher3', 'Lê Văn Giáo viên 3', '0123456782', 'teacher3@school.edu.vn', 'MALE', 'TEACHER')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (5, 'cuong.lv', '123456789', 'Lê Văn Cường', '0123456783', 'cuong.lv@school.edu.vn', 'MALE', 'STUDENT')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (6, 'dung.mt', '123456789', 'Mai Thị Dung', '0123456784', 'dung.mt@school.edu.vn', 'FEMALE', 'STUDENT')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (7, 'hoa.tt', '123456789', 'Trần Thị Hoa', '0123456785', 'hoa.tt@school.edu.vn', 'FEMALE', 'STUDENT')"
+        };
         
-        System.out.println("Admin account created/verified: admin/admin");
+        for (String sql : users) {
+            stmt.execute(sql);
+        }
+        
+        System.out.println("Sample users created/verified");
     }
     
     private static void insertSampleClassrooms(Statement stmt) throws Exception {
@@ -130,6 +143,32 @@ public class InitData {
         };
         
         for (String sql : schedules) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private static void insertSampleStudentGrades(Statement stmt) throws Exception {
+        String[] grades = {
+            // Điểm cho học sinh 5 (cuong.lv) - lớp 10A1
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (8.5, 8.0, 9.0, 8.5, 'GIOI', 1, 10, 5, 1)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (7.5, 7.0, 8.0, 7.5, 'KHA', 1, 10, 5, 2)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (9.0, 8.5, 9.5, 9.0, 'GIOI', 1, 10, 5, 3)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (8.0, 7.5, 8.5, 8.0, 'GIOI', 1, 10, 5, 5)",
+            
+            // Điểm cho học sinh 6 (dung.mt) - lớp 10A1
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (9.5, 9.0, 9.5, 9.3, 'XUAT_SAC', 1, 10, 6, 1)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (8.0, 8.5, 8.0, 8.2, 'GIOI', 1, 10, 6, 2)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (7.0, 7.5, 7.0, 7.2, 'KHA', 1, 10, 6, 3)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (8.5, 8.0, 9.0, 8.5, 'GIOI', 1, 10, 6, 5)",
+            
+            // Điểm cho học sinh 7 (hoa.tt) - lớp 10A1
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (6.5, 6.0, 7.0, 6.5, 'TRUNG_BINH', 1, 10, 7, 1)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (7.0, 7.5, 7.0, 7.2, 'KHA', 1, 10, 7, 2)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (8.0, 8.5, 8.0, 8.2, 'GIOI', 1, 10, 7, 3)",
+            "INSERT OR IGNORE INTO student_grades (regular_grade, midterm_grade, final_grade, average_grade, classified, semester, academic_year, student_id, subject_id) VALUES (9.0, 8.5, 9.5, 9.0, 'GIOI', 1, 10, 7, 5)"
+        };
+        
+        for (String sql : grades) {
             stmt.execute(sql);
         }
     }
