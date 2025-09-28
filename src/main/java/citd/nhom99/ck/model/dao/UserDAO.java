@@ -1,13 +1,18 @@
 package citd.nhom99.ck.model.dao;
 
-import citd.nhom99.ck.config.DBConfig;
-import citd.nhom99.ck.model.constant.Gender;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.User;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import citd.nhom99.ck.config.DBConfig;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.constant.Gender;
+import citd.nhom99.ck.model.constant.Role;
 
 public class UserDAO {
 
@@ -22,7 +27,14 @@ public class UserDAO {
             pstmt.setString(3, user.getFullName());
             pstmt.setString(4, user.getPhoneNumber());
             pstmt.setString(5, user.getEmail());
-            pstmt.setString(6, user.getGender().name());
+            
+            // Handle null gender
+            if (user.getGender() != null) {
+                pstmt.setString(6, user.getGender().name());
+            } else {
+                pstmt.setNull(6, Types.VARCHAR);
+            }
+            
             pstmt.setString(7, user.getRole().name());
 
             int affectedRows = pstmt.executeUpdate();
@@ -47,7 +59,14 @@ public class UserDAO {
             pstmt.setString(3, newUser.getFullName());
             pstmt.setString(4, newUser.getPhoneNumber());
             pstmt.setString(5, newUser.getEmail());
-            pstmt.setString(6, newUser.getGender().name());
+            
+            // Handle null gender
+            if (newUser.getGender() != null) {
+                pstmt.setString(6, newUser.getGender().name());
+            } else {
+                pstmt.setNull(6, Types.VARCHAR);
+            }
+            
             pstmt.setString(7, role.name());
 
             int affectedRows = pstmt.executeUpdate();
@@ -113,8 +132,21 @@ public class UserDAO {
             pstmt.setString(3, user.getFullName());
             pstmt.setString(4, user.getPhoneNumber());
             pstmt.setString(5, user.getEmail());
-            pstmt.setString(6, user.getGender().name());
-            pstmt.setString(7, user.getRole().name());
+            
+            // Handle null gender
+            if (user.getGender() != null) {
+                pstmt.setString(6, user.getGender().name());
+            } else {
+                pstmt.setNull(6, Types.VARCHAR);
+            }
+            
+            // Handle null role
+            if (user.getRole() != null) {
+                pstmt.setString(7, user.getRole().name());
+            } else {
+                pstmt.setNull(7, Types.VARCHAR);
+            }
+            
             pstmt.setInt(8, user.getUserId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -140,8 +172,33 @@ public class UserDAO {
         user.setFullName(rs.getString("full_name"));
         user.setPhoneNumber(rs.getString("phone_number"));
         user.setEmail(rs.getString("email"));
-        user.setGender(Gender.valueOf(rs.getString("gender")));
-        user.setRole(Role.valueOf(rs.getString("role")));
+        
+        // Handle null gender values
+        String genderStr = rs.getString("gender");
+        if (genderStr != null && !genderStr.trim().isEmpty()) {
+            try {
+                user.setGender(Gender.valueOf(genderStr));
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid gender value: " + genderStr + ", setting to null");
+                user.setGender(null);
+            }
+        } else {
+            user.setGender(null);
+        }
+        
+        // Handle null role values
+        String roleStr = rs.getString("role");
+        if (roleStr != null && !roleStr.trim().isEmpty()) {
+            try {
+                user.setRole(Role.valueOf(roleStr));
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid role value: " + roleStr + ", setting to null");
+                user.setRole(null);
+            }
+        } else {
+            user.setRole(null);
+        }
+        
         return user;
     }
 }

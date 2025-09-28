@@ -2,6 +2,7 @@ package citd.nhom99.ck.view.admin;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -25,7 +26,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.JTableHeader;
 
 import citd.nhom99.ck.controller.StudentController;
@@ -157,6 +160,10 @@ public class StudentManagementPanel extends JPanel {
         studentTable.setShowGrid(true);
         studentTable.setIntercellSpacing(new Dimension(0, 1));
         
+        // Set custom renderer for "Lớp" and "Điểm" columns to make them look like links
+        studentTable.getColumn("Lớp").setCellRenderer(new LinkCellRenderer());
+        studentTable.getColumn("Điểm").setCellRenderer(new LinkCellRenderer());
+        
         // Add mouse listener for table clicks
         studentTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -190,6 +197,26 @@ public class StudentManagementPanel extends JPanel {
         tablePanel.add(scrollPane, BorderLayout.CENTER);
 
         return tablePanel;
+    }
+    
+    // Custom cell renderer to make text look like links
+    private class LinkCellRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
+            if (value != null && !value.toString().equals("Chưa có lớp") && !value.toString().equals("Chưa có điểm")) {
+                // Make it look like a link
+                c.setForeground(new Color(0, 102, 204)); // Blue color
+                c.setFont(c.getFont().deriveFont(Font.ITALIC | Font.BOLD)); // Underline
+            } else {
+                // Regular text for "Chưa có lớp" or "Chưa có điểm"
+                c.setForeground(Color.BLACK);
+                c.setFont(c.getFont().deriveFont(Font.PLAIN));
+            }
+            
+            return c;
+        }
     }
 
     private JPanel createButtonPanel() {
@@ -501,12 +528,23 @@ public class StudentManagementPanel extends JPanel {
                     return;
                 }
 
+                // Lấy thông tin user hiện tại từ database
+                User currentUser = userDAO.getUserById(userId);
+                if (currentUser == null) {
+                    JOptionPane.showMessageDialog(editStudentDialog, "Không tìm thấy thông tin học sinh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 // Cập nhật thông tin học sinh
                 User updatedUser = new User();
                 updatedUser.setUserId(userId);
+                updatedUser.setUsername(currentUser.getUsername()); // Giữ nguyên username
+                updatedUser.setPassword(currentUser.getPassword()); // Giữ nguyên password
                 updatedUser.setFullName(newFullName);
                 updatedUser.setEmail(newEmail);
                 updatedUser.setPhoneNumber(newPhoneNumber);
+                updatedUser.setGender(currentUser.getGender()); // Giữ nguyên gender
+                updatedUser.setRole(currentUser.getRole()); // Giữ nguyên role
 
                 // Gọi phương thức update trong Controller
                 studentController.updateStudent(updatedUser);
