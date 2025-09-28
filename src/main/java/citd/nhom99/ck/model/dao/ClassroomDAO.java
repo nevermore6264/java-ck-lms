@@ -132,7 +132,8 @@ public class ClassroomDAO {
             pstmt.setString(1, classId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                students.add(studentDAO.getStudentById(rs.getInt("user_id")));
+                // Use method that doesn't load classroom to avoid circular dependency
+                students.add(studentDAO.getStudentByIdWithoutClassroom(rs.getInt("user_id")));
             }
         } catch (SQLException e) {
             System.out.println("Error loading students for classroom " + classId + ": " + e.getMessage());

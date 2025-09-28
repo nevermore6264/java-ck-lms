@@ -21,7 +21,7 @@ public class StudentDAO {
     }
 
     public void createStudent(User student) {
-        String sql = "INSERT INTO students (student_id, student_code) VALUES(?, ?)";
+        String sql = "INSERT INTO students (user_id, student_code) VALUES(?, ?)";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
 
@@ -58,7 +58,19 @@ public class StudentDAO {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return extractStudentFromResultSet(rs);
+                Student student = extractStudentFromResultSet(rs);
+                
+                // Load classroom information if class_id > 0
+                if (student.getClassroomId() > 0) {
+                    try {
+                        ClassroomDAO classroomDAO = new ClassroomDAO();
+                        student.setClassroom(classroomDAO.getClassroomById(student.getClassroomId()));
+                    } catch (Exception e) {
+                        System.out.println("Error loading classroom for student " + userId + ": " + e.getMessage());
+                    }
+                }
+                
+                return student;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -71,11 +83,24 @@ public class StudentDAO {
     }
 
     public List<Student> getAllStudents() {
-        String sql = "SELECT * FROM students";
+        String sql = "SELECT s.*, c.class_name " +
+                    "FROM students s " +
+                    "LEFT JOIN classrooms c ON s.class_id = c.class_id";
         List<Student> students = new ArrayList<>();
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
-                students.add(extractStudentFromResultSet(rs));
+                Student student = extractStudentFromResultSet(rs);
+                
+                // Set classroom name directly from JOIN result
+                String className = rs.getString("class_name");
+                if (className != null && student.getClassroomId() > 0) {
+                    // Create a simple classroom object with just the name
+                    citd.nhom99.ck.model.Classroom classroom = new citd.nhom99.ck.model.Classroom(
+                        student.getClassroomId(), className, 0);
+                    student.setClassroom(classroom);
+                }
+                
+                students.add(student);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -84,7 +109,28 @@ public class StudentDAO {
     }
 
     public void updateStudent(User student) {
-        System.out.println("DAO: Update student" + student.toString());
+        // Update user information first
+        userDAO.updateUser(student);
+        
+        // Update student-specific information if needed
+        String sql = "UPDATE students SET student_code = ? WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, Helper.codeGenerate(student.getUserId(), student.getRole()));
+            pstmt.setInt(2, student.getUserId());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("DAO: Updated student " + student.getUserId());
+            } else {
+                System.out.println("DAO: No student found with ID " + student.getUserId());
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("DAO: Error updating student: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     public void updateStudentClassroom(int studentId, int classroomId) {
@@ -119,15 +165,26 @@ public class StudentDAO {
         student.setStudentGradeId(rs.getInt("grade_id"));
         student.setClassroomId(rs.getInt("class_id"));
         
-        // Load classroom information
-        ClassroomDAO classroomDAO = new ClassroomDAO();
-        student.setClassroom(classroomDAO.getClassroomById(rs.getInt("class_id")));
-        
         // Load student grade information
         if (rs.getInt("grade_id") > 0) {
             student.setStudentGrade(studentGradeDAO.getStudentGradeById(rs.getInt("grade_id")));
         }
 
         return student;
+    }
+    
+    // Method to get student without loading classroom (used by ClassroomDAO to avoid circular dependency)
+    public Student getStudentByIdWithoutClassroom(int userId) {
+        String sql = "SELECT * FROM students WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractStudentFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }
