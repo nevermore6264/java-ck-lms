@@ -28,8 +28,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 
 import citd.nhom99.ck.controller.StudentController;
 import citd.nhom99.ck.model.Student;
@@ -198,7 +198,7 @@ public class StudentManagementPanel extends JPanel {
 
         return tablePanel;
     }
-    
+
     // Custom cell renderer to make text look like links
     private class LinkCellRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
         @Override
@@ -645,7 +645,7 @@ public class StudentManagementPanel extends JPanel {
                     student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm"
                 };
                 tableModel.addRow(rowData);
-        }
+            }
     }
 
     private void performSearch() {
