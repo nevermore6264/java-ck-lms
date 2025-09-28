@@ -96,8 +96,15 @@ public class StudentDAO {
         student.setUser(userDAO.getUserById(rs.getInt("user_id")));
         student.setStudentCode(rs.getString("student_code"));
         student.setStudentGradeId(rs.getInt("grade_id"));
+        
+        // Load classroom information
         ClassroomDAO classroomDAO = new ClassroomDAO();
         student.setClassroom(classroomDAO.getClassroomById(rs.getInt("class_id")));
+        
+        // Load student grade information
+        if (rs.getInt("grade_id") > 0) {
+            student.setStudentGrade(studentGradeDAO.getStudentGradeById(rs.getInt("grade_id")));
+        }
 
         return student;
     }

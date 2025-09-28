@@ -158,7 +158,7 @@ public class HomePanel extends JPanel {
         dateLabel.setForeground(Color.WHITE);
         
         // System info
-        JLabel systemLabel = new JLabel("Hệ thống LMS v1.0 - © 2024 Trường THPT N99");
+        JLabel systemLabel = new JLabel("Hệ thống LMS v1.0 - © 2025 Trường THPT N99");
         systemLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         systemLabel.setForeground(new Color(200, 200, 200));
         systemLabel.setHorizontalAlignment(SwingConstants.RIGHT);

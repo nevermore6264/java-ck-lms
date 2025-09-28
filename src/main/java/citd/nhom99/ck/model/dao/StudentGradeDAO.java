@@ -16,6 +16,31 @@ public class StudentGradeDAO {
     public StudentGradeDAO() {
     }
 
+    public StudentGrade getStudentGradeById(int gradeId) {
+        String sql = "SELECT sg.*, s.subject_name, st.student_code, u.full_name " +
+                    "FROM student_grades sg " +
+                    "LEFT JOIN subjects s ON sg.subject_id = s.subject_id " +
+                    "LEFT JOIN students st ON sg.student_id = st.user_id " +
+                    "LEFT JOIN users u ON st.user_id = u.user_id " +
+                    "WHERE sg.grade_id = ?";
+        
+        try (Connection conn = DBConfig.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, gradeId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return extractStudentGradeFromResultSet(rs);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+
     public List<StudentGrade> getGradesByStudentId(int studentId, int semester, int academicYear) {
         String sql = "SELECT sg.*, s.subject_name, st.student_code, u.full_name " +
                     "FROM student_grades sg " +
