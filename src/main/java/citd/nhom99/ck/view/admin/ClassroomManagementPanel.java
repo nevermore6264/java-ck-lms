@@ -24,7 +24,9 @@ import javax.swing.table.JTableHeader;
 
 import citd.nhom99.ck.controller.ClassroomController;
 import citd.nhom99.ck.model.Classroom;
+import citd.nhom99.ck.model.Schedule;
 import citd.nhom99.ck.model.Teacher;
+import citd.nhom99.ck.model.dao.ScheduleDAO;
 
 public class ClassroomManagementPanel extends JPanel {
     private JTable classroomTable;
@@ -219,14 +221,17 @@ public class ClassroomManagementPanel extends JPanel {
 
         editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
         deleteButton = createStyledButton("Xóa lớp học", new Color(231, 76, 60));
+        JButton viewScheduleButton = createStyledButton("Xem thời khóa biểu", new Color(155, 89, 182));
         refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
         editButton.addActionListener(e -> handleEditClassroom());
         deleteButton.addActionListener(e -> handleDeleteClassroom());
+        viewScheduleButton.addActionListener(e -> handleViewSchedule());
         refreshButton.addActionListener(e -> loadClassroomData());
 
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(viewScheduleButton);
         buttonPanel.add(refreshButton);
 
         return buttonPanel;
@@ -321,6 +326,65 @@ public class ClassroomManagementPanel extends JPanel {
             }
         } else {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn một lớp học để xóa.", "Thông báo", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void handleViewSchedule() {
+        int selectedRow = classroomTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một lớp học để xem thời khóa biểu!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (selectedRow >= 0 && selectedRow < allClassrooms.size()) {
+            Classroom classroom = allClassrooms.get(selectedRow);
+            
+            try {
+                // Load schedule for this classroom (current semester and academic year)
+                ScheduleDAO scheduleDAO = new ScheduleDAO();
+                List<Schedule> schedules = scheduleDAO.getScheduleByClassroomId(classroom.getClassId(), 1, 10); // Semester 1, Grade 10
+                
+                if (schedules != null && !schedules.isEmpty()) {
+                    // Build schedule display
+                    StringBuilder scheduleText = new StringBuilder();
+                    scheduleText.append("Thời khóa biểu lớp ").append(classroom.getClassName()).append(":\n\n");
+                    
+                    // Group by day
+                    String[] days = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
+                    String[] dayNames = {"Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ nhật"};
+                    
+                    for (int i = 0; i < days.length; i++) {
+                        String day = days[i];
+                        List<Schedule> daySchedules = schedules.stream()
+                            .filter(s -> day.equals(s.getDayOfWeek()))
+                            .sorted((s1, s2) -> Integer.compare(s1.getPeriod(), s2.getPeriod()))
+                            .collect(java.util.stream.Collectors.toList());
+                        
+                        if (!daySchedules.isEmpty()) {
+                            scheduleText.append(dayNames[i]).append(":\n");
+                            for (Schedule schedule : daySchedules) {
+                                scheduleText.append(String.format("  Tiết %d: %s - GV: %s\n", 
+                                    schedule.getPeriod(),
+                                    schedule.getSubject() != null ? schedule.getSubject().getSubjectName() : "Môn " + schedule.getSubjectId(),
+                                    schedule.getTeacher() != null ? schedule.getTeacher().getUser().getFullName() : "GV " + schedule.getTeacherId()));
+                            }
+                            scheduleText.append("\n");
+                        }
+                    }
+                    
+                    JOptionPane.showMessageDialog(
+                        this, 
+                        scheduleText.toString(), 
+                        "Thời khóa biểu lớp " + classroom.getClassName(), 
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    JOptionPane.showMessageDialog(this, "Lớp " + classroom.getClassName() + " chưa có thời khóa biểu!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi tải thời khóa biểu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
         }
     }
 }

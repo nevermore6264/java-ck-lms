@@ -100,10 +100,11 @@ public class TeacherDAO {
     public void updateTeacher(Teacher teacher) {
         userDAO.updateUser(teacher.getUser());
 
-        String sql = "UPDATE teachers SET subject_id = ? WHERE teacher_code = ?";
+        String sql = "UPDATE teachers SET subject_id = ?, classroom_id = ? WHERE teacher_code = ?";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, teacher.getSubjectId());
-            pstmt.setString(2, teacher.getTeacherCode());
+            pstmt.setInt(2, teacher.getClassroomId());
+            pstmt.setString(3, teacher.getTeacherCode());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -119,6 +120,7 @@ public class TeacherDAO {
         teacher.setTeacherCode(rs.getString("teacher_code"));
         teacher.setUser(userDAO.getUserById(rs.getInt("user_id")));
         teacher.setSubjectId(rs.getInt("subject_id"));
+        teacher.setClassroomId(rs.getInt("classroom_id"));
 
         return teacher;
     }

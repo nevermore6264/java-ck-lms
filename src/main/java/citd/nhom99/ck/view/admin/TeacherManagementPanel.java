@@ -31,6 +31,7 @@ import javax.swing.table.JTableHeader;
 
 import citd.nhom99.ck.controller.TeacherController;
 import citd.nhom99.ck.model.Classroom;
+import citd.nhom99.ck.model.Student;
 import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.User;
 import citd.nhom99.ck.model.constant.Gender;
@@ -384,6 +385,20 @@ public class TeacherManagementPanel extends JPanel {
         tableModel.setRowCount(0);
         for (Teacher teacher : teachers) {
             if (teacher.getUser() != null) {
+                // Get classroom name
+                String classroomName = "Không chủ nhiệm";
+                if (teacher.getClassroomId() != 0) {
+                    try {
+                        ClassroomDAO classroomDAO = new ClassroomDAO();
+                        Classroom classroom = classroomDAO.getClassroomById(teacher.getClassroomId());
+                        if (classroom != null) {
+                            classroomName = classroom.getClassName();
+                        }
+                    } catch (Exception e) {
+                        classroomName = "Lớp " + teacher.getClassroomId();
+                    }
+                }
+                
                 Object[] rowData = {
                         teacher.getUser().getUserId(),
                         teacher.getTeacherCode(),
@@ -391,7 +406,7 @@ public class TeacherManagementPanel extends JPanel {
                         teacher.getUser().getEmail(),
                         teacher.getUser().getPhoneNumber(),
                         teacher.getUser().getGender(),
-                        teacher.getClassroomId() != 0 ? teacher.getClassroomId() : "Không chủ nhiệm",
+                        classroomName,
                         teacher.getSubjectId()
                 };
                 tableModel.addRow(rowData);
@@ -426,24 +441,54 @@ public class TeacherManagementPanel extends JPanel {
         if (row >= 0 && row < allTeachers.size()) {
             Teacher teacher = allTeachers.get(row);
             if (teacher.getClassroomId() != 0) {
-                String message = String.format(
-                    "Thông tin lớp chủ nhiệm:\n\n" +
-                    "• Giáo viên: %s\n" +
-                    "• Mã GV: %s\n" +
-                    "• Lớp chủ nhiệm: %s\n" +
-                    "• ID lớp: %d",
-                    teacher.getUser().getFullName(),
-                    teacher.getTeacherCode(),
-                    "Lớp " + teacher.getClassroomId(), // Có thể load tên lớp từ database
-                    teacher.getClassroomId()
-                );
-                
-                JOptionPane.showMessageDialog(
-                    this, 
-                    message, 
-                    "Thông tin lớp chủ nhiệm", 
-                    JOptionPane.INFORMATION_MESSAGE
-                );
+                try {
+                    // Load classroom information
+                    ClassroomDAO classroomDAO = new ClassroomDAO();
+                    Classroom classroom = classroomDAO.getClassroomById(teacher.getClassroomId());
+                    
+                    if (classroom != null) {
+                        // Build student list
+                        StringBuilder studentList = new StringBuilder();
+                        if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
+                            studentList.append("Danh sách học sinh:\n");
+                            for (int i = 0; i < classroom.getStudents().size(); i++) {
+                                Student student = classroom.getStudents().get(i);
+                                studentList.append(String.format("%d. %s (%s)\n", 
+                                    i + 1, 
+                                    student.getUser().getFullName(),
+                                    student.getStudentCode()));
+                            }
+                        } else {
+                            studentList.append("Lớp chưa có học sinh nào.");
+                        }
+                        
+                        String message = String.format(
+                            "Thông tin lớp chủ nhiệm:\n\n" +
+                            "• Giáo viên: %s\n" +
+                            "• Mã GV: %s\n" +
+                            "• Lớp chủ nhiệm: %s\n" +
+                            "• Sĩ số: %d học sinh\n\n" +
+                            "%s",
+                            teacher.getUser().getFullName(),
+                            teacher.getTeacherCode(),
+                            classroom.getClassName(),
+                            classroom.getStudents() != null ? classroom.getStudents().size() : 0,
+                            studentList.toString()
+                        );
+                        
+                        JOptionPane.showMessageDialog(
+                            this, 
+                            message, 
+                            "Thông tin lớp chủ nhiệm", 
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin lớp học!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Lỗi khi tải thông tin lớp: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Giáo viên chưa được phân lớp chủ nhiệm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             }
