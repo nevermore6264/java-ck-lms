@@ -195,17 +195,20 @@ public class TeacherManagementPanel extends JPanel {
         JButton addButton = createStyledButton("Thêm giáo viên", new Color(46, 204, 113));
         JButton editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
         JButton deleteButton = createStyledButton("Xóa giáo viên", new Color(231, 76, 60));
+        JButton viewDetailsButton = createStyledButton("Xem chi tiết", new Color(155, 89, 182));
         JButton refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
         // Thêm action listeners
         addButton.addActionListener(e -> handleAddTeacher());
         editButton.addActionListener(e -> handleEditTeacher());
         deleteButton.addActionListener(e -> handleDeleteTeacher());
+        viewDetailsButton.addActionListener(e -> handleViewTeacherDetails());
         refreshButton.addActionListener(e -> loadTeacherData());
 
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(viewDetailsButton);
         buttonPanel.add(refreshButton);
 
         return buttonPanel;
@@ -411,5 +414,100 @@ public class TeacherManagementPanel extends JPanel {
                 .collect(java.util.stream.Collectors.toList());
 
         displayTeachers(filteredTeachers);
+    }
+
+    private void handleClassClick(int row) {
+        if (row >= 0 && row < allTeachers.size()) {
+            Teacher teacher = allTeachers.get(row);
+            if (teacher.getClassroomId() != 0) {
+                String message = String.format(
+                    "Thông tin lớp chủ nhiệm:\n\n" +
+                    "• Giáo viên: %s\n" +
+                    "• Mã GV: %s\n" +
+                    "• Lớp chủ nhiệm: %s\n" +
+                    "• ID lớp: %d",
+                    teacher.getUser().getFullName(),
+                    teacher.getTeacherCode(),
+                    "Lớp " + teacher.getClassroomId(), // Có thể load tên lớp từ database
+                    teacher.getClassroomId()
+                );
+                
+                JOptionPane.showMessageDialog(
+                    this, 
+                    message, 
+                    "Thông tin lớp chủ nhiệm", 
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(this, "Giáo viên chưa được phân lớp chủ nhiệm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void handleSubjectClick(int row) {
+        if (row >= 0 && row < allTeachers.size()) {
+            Teacher teacher = allTeachers.get(row);
+            if (teacher.getSubjectId() != 0) {
+                String message = String.format(
+                    "Thông tin môn dạy:\n\n" +
+                    "• Giáo viên: %s\n" +
+                    "• Mã GV: %s\n" +
+                    "• Môn dạy: %s\n" +
+                    "• ID môn: %d",
+                    teacher.getUser().getFullName(),
+                    teacher.getTeacherCode(),
+                    "Môn " + teacher.getSubjectId(), // Có thể load tên môn từ database
+                    teacher.getSubjectId()
+                );
+                
+                JOptionPane.showMessageDialog(
+                    this, 
+                    message, 
+                    "Thông tin môn dạy", 
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(this, "Giáo viên chưa được phân môn dạy!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void handleViewTeacherDetails() {
+        int selectedRow = teacherTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn giáo viên để xem chi tiết!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedRow >= 0 && selectedRow < allTeachers.size()) {
+            Teacher teacher = allTeachers.get(selectedRow);
+            
+            String message = String.format(
+                "Thông tin chi tiết giáo viên:\n\n" +
+                "• ID: %d\n" +
+                "• Mã GV: %s\n" +
+                "• Họ tên: %s\n" +
+                "• Email: %s\n" +
+                "• SĐT: %s\n" +
+                "• Giới tính: %s\n" +
+                "• Lớp chủ nhiệm: %s\n" +
+                "• Môn dạy: %s",
+                teacher.getUser().getUserId(),
+                teacher.getTeacherCode(),
+                teacher.getUser().getFullName(),
+                teacher.getUser().getEmail(),
+                teacher.getUser().getPhoneNumber(),
+                teacher.getUser().getGender(),
+                teacher.getClassroomId() != 0 ? "Lớp " + teacher.getClassroomId() : "Chưa phân lớp",
+                teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"
+            );
+
+            JOptionPane.showMessageDialog(
+                this, 
+                message, 
+                "Chi tiết giáo viên", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }
 }
