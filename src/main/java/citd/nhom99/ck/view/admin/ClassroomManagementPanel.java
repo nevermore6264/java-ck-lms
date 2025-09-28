@@ -32,6 +32,7 @@ import citd.nhom99.ck.controller.ClassroomController;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Schedule;
 import citd.nhom99.ck.model.Teacher;
+import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.ScheduleDAO;
 import citd.nhom99.ck.model.dao.TeacherDAO;
 
@@ -147,6 +148,10 @@ public class ClassroomManagementPanel extends JPanel {
             String teacherName = "Chưa có GVCN";
             if (classroom.getTeacher() != null && classroom.getTeacher().getUser() != null) {
                 teacherName = classroom.getTeacher().getUser().getFullName();
+                System.out.println("DEBUG: Classroom " + classroom.getClassName() + " has GVCN: " + teacherName);
+            } else {
+                System.out.println("DEBUG: Classroom " + classroom.getClassName() + " - Teacher: " + classroom.getTeacher() + 
+                                 ", TeacherId: " + classroom.getTeacherId());
             }
             
             // Get student count
@@ -309,83 +314,91 @@ public class ClassroomManagementPanel extends JPanel {
                 
                 JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Sửa thông tin lớp học", true);
                 dialog.setLayout(new BorderLayout());
-                dialog.setSize(400, 250);
+                dialog.setSize(500, 350);
                 dialog.setLocationRelativeTo(null);
                 dialog.getContentPane().setBackground(new Color(248, 249, 250));
+                dialog.setResizable(false);
                 
                 // Header panel
                 JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                headerPanel.setBackground(new Color(248, 249, 250));
+                headerPanel.setBackground(new Color(52, 144, 220));
+                headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
                 JLabel headerLabel = new JLabel("Sửa thông tin lớp học");
-                headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
-                headerLabel.setForeground(new Color(52, 58, 64));
+                headerLabel.setFont(new Font("Arial", Font.BOLD, 18));
+                headerLabel.setForeground(Color.WHITE);
                 headerPanel.add(headerLabel);
                 
                 // Form panel
                 JPanel formPanel = new JPanel(new GridBagLayout());
                 formPanel.setBackground(new Color(248, 249, 250));
-                formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+                formPanel.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
                 
                 GridBagConstraints gbc = new GridBagConstraints();
-                gbc.insets = new Insets(10, 10, 10, 10);
+                gbc.insets = new Insets(20, 20, 20, 20);
                 gbc.anchor = GridBagConstraints.WEST;
                 
                 // ID field (read-only)
                 gbc.gridx = 0;
                 gbc.gridy = 0;
                 JLabel idLabel = new JLabel("ID lớp:");
-                idLabel.setFont(new Font("Arial", Font.BOLD, 14));
-                idLabel.setForeground(new Color(60, 60, 60));
+                idLabel.setFont(new Font("Arial", Font.BOLD, 16));
+                idLabel.setForeground(new Color(52, 58, 64));
                 formPanel.add(idLabel, gbc);
                 
                 gbc.gridx = 1;
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbc.weightx = 1.0;
                 JTextField idField = new JTextField(String.valueOf(classroom.getClassId()));
-                idField.setFont(new Font("Arial", Font.PLAIN, 14));
+                idField.setFont(new Font("Arial", Font.PLAIN, 16));
                 idField.setEditable(false);
-                idField.setColumns(25);
-                idField.setPreferredSize(new Dimension(300, 35));
                 idField.setBackground(new Color(240, 240, 240));
                 idField.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                    BorderFactory.createEmptyBorder(15, 20, 15, 20)
                 ));
                 formPanel.add(idField, gbc);
                 
                 // Class name field
                 gbc.gridx = 0;
                 gbc.gridy = 1;
+                gbc.fill = GridBagConstraints.NONE;
+                gbc.weightx = 0.0;
                 JLabel nameLabel = new JLabel("Tên lớp:");
-                nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
-                nameLabel.setForeground(new Color(60, 60, 60));
+                nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+                nameLabel.setForeground(new Color(52, 58, 64));
                 formPanel.add(nameLabel, gbc);
                 
                 gbc.gridx = 1;
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbc.weightx = 1.0;
                 JTextField nameField = new JTextField(classroom.getClassName());
-                nameField.setFont(new Font("Arial", Font.PLAIN, 14));
-                nameField.setColumns(20);
+                nameField.setFont(new Font("Arial", Font.PLAIN, 16));
                 nameField.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                    BorderFactory.createEmptyBorder(15, 20, 15, 20)
                 ));
                 formPanel.add(nameField, gbc);
                 
                 // Button panel
-                JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+                JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 25, 20));
                 buttonPanel.setBackground(new Color(248, 249, 250));
+                buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 25, 20));
                 
                 JButton saveButton = new JButton("Lưu thay đổi");
-                saveButton.setFont(new Font("Arial", Font.BOLD, 13));
+                saveButton.setFont(new Font("Arial", Font.BOLD, 15));
                 saveButton.setBackground(new Color(46, 204, 113));
                 saveButton.setForeground(Color.WHITE);
-                saveButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+                saveButton.setPreferredSize(new Dimension(160, 45));
+                saveButton.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
                 saveButton.setFocusPainted(false);
                 saveButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 
                 JButton cancelButton = new JButton("Hủy");
-                cancelButton.setFont(new Font("Arial", Font.BOLD, 13));
+                cancelButton.setFont(new Font("Arial", Font.BOLD, 15));
                 cancelButton.setBackground(new Color(149, 165, 166));
                 cancelButton.setForeground(Color.WHITE);
-                cancelButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+                cancelButton.setPreferredSize(new Dimension(160, 45));
+                cancelButton.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
                 cancelButton.setFocusPainted(false);
                 cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 
@@ -407,7 +420,7 @@ public class ClassroomManagementPanel extends JPanel {
                             return;
                         }
                         
-                        classroom.setClassName(newClassName);
+                    classroom.setClassName(newClassName);
                         // TODO: Update in database
                         // classroomDAO.updateClassroom(classroom);
                         
@@ -446,15 +459,15 @@ public class ClassroomManagementPanel extends JPanel {
                     classroom.getStudents() != null ? classroom.getStudents().size() : 0
                 );
                 
-                int confirm = JOptionPane.showConfirmDialog(this,
+            int confirm = JOptionPane.showConfirmDialog(this,
                         message,
                         "Xác nhận xóa lớp học",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
-                if (confirm == JOptionPane.YES_OPTION) {
+            if (confirm == JOptionPane.YES_OPTION) {
                     // TODO: Implement delete classroom
                     // classroomDAO.deleteClassroom(classroom.getClassId());
-                    loadClassroomData();
+                loadClassroomData();
                     JOptionPane.showMessageDialog(this, "Đã xóa lớp học thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
@@ -534,25 +547,27 @@ public class ClassroomManagementPanel extends JPanel {
             
             JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Gắn GVCN cho lớp " + classroom.getClassName(), true);
             dialog.setLayout(new BorderLayout());
-            dialog.setSize(400, 300);
+            dialog.setSize(500, 400);
             dialog.setLocationRelativeTo(null);
             dialog.getContentPane().setBackground(new Color(248, 249, 250));
+            dialog.setResizable(false);
             
             // Header panel
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            headerPanel.setBackground(new Color(248, 249, 250));
+            headerPanel.setBackground(new Color(46, 204, 113));
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
             JLabel headerLabel = new JLabel("Gắn GVCN cho lớp: " + classroom.getClassName());
-            headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
-            headerLabel.setForeground(new Color(52, 58, 64));
+            headerLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            headerLabel.setForeground(Color.WHITE);
             headerPanel.add(headerLabel);
             
             // Form panel
             JPanel formPanel = new JPanel(new GridBagLayout());
             formPanel.setBackground(new Color(248, 249, 250));
-            formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            formPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
             
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(10, 10, 10, 10);
+            gbc.insets = new Insets(20, 20, 20, 20);
             gbc.anchor = GridBagConstraints.WEST;
             
             // Load available teachers
@@ -572,10 +587,10 @@ public class ClassroomManagementPanel extends JPanel {
             }
             
             JComboBox<String> teacherComboBox = new JComboBox<>(teacherNames);
-            teacherComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
+            teacherComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
             teacherComboBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
             ));
             
             // Set current teacher if any
@@ -586,31 +601,38 @@ public class ClassroomManagementPanel extends JPanel {
             
             gbc.gridx = 0;
             gbc.gridy = 0;
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.weightx = 0.0;
             JLabel teacherLabel = new JLabel("Giáo viên chủ nhiệm:");
-            teacherLabel.setFont(new Font("Arial", Font.BOLD, 14));
-            teacherLabel.setForeground(new Color(60, 60, 60));
+            teacherLabel.setFont(new Font("Arial", Font.BOLD, 16));
+            teacherLabel.setForeground(new Color(52, 58, 64));
             formPanel.add(teacherLabel, gbc);
             
             gbc.gridx = 1;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.weightx = 1.0;
             formPanel.add(teacherComboBox, gbc);
             
             // Button panel
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
             buttonPanel.setBackground(new Color(248, 249, 250));
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
             
             JButton assignButton = new JButton("Gắn GVCN");
-            assignButton.setFont(new Font("Arial", Font.BOLD, 13));
+            assignButton.setFont(new Font("Arial", Font.BOLD, 14));
             assignButton.setBackground(new Color(46, 204, 113));
             assignButton.setForeground(Color.WHITE);
-            assignButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+            assignButton.setPreferredSize(new Dimension(140, 40));
+            assignButton.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
             assignButton.setFocusPainted(false);
             assignButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             
             JButton cancelButton = new JButton("Hủy");
-            cancelButton.setFont(new Font("Arial", Font.BOLD, 13));
+            cancelButton.setFont(new Font("Arial", Font.BOLD, 14));
             cancelButton.setBackground(new Color(149, 165, 166));
             cancelButton.setForeground(Color.WHITE);
-            cancelButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+            cancelButton.setPreferredSize(new Dimension(140, 40));
+            cancelButton.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
             cancelButton.setFocusPainted(false);
             cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             
@@ -642,8 +664,16 @@ public class ClassroomManagementPanel extends JPanel {
                         
                         // Update classroom's teacher
                         classroom.setTeacherId(newTeacherId);
-                        // TODO: Update in database
-                        // classroomDAO.updateClassroom(classroom);
+                        
+                        // Update in database
+                        try {
+                            ClassroomDAO classroomDAO = new ClassroomDAO();
+                            classroomDAO.updateClassroom(classroom);
+                            System.out.println("DEBUG: Updated classroom " + classroom.getClassId() + " with teacher ID " + newTeacherId);
+                        } catch (Exception dbEx) {
+                            System.out.println("DEBUG: Error updating classroom in database: " + dbEx.getMessage());
+                            throw dbEx;
+                        }
                         
                         JOptionPane.showMessageDialog(dialog, "Gắn GVCN thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         dialog.dispose();

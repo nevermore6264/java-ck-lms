@@ -57,7 +57,7 @@ public class TeacherDAO {
     }
 
     public Teacher getTeacherById(int teacherId) {
-        String sql = "SELECT * FROM teachers WHERE teacher_code = ?";
+        String sql = "SELECT * FROM teachers WHERE user_id = ?";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, teacherId);
             ResultSet rs = pstmt.executeQuery();
@@ -65,7 +65,7 @@ public class TeacherDAO {
                 return extractTeacherFromResultSet(rs);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error getting teacher by ID " + teacherId + ": " + e.getMessage());
         }
         return null;
     }

@@ -101,16 +101,19 @@ public class ClassroomDAO {
     }
 
     public void updateClassroom(Classroom classroom) {
-//        String sql = "UPDATE classrooms SET class_name = ?, gvcn_id = ? WHERE class_id = ?";
-//        try (Connection conn = DBConfig.getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//            pstmt.setString(1, classroom.getClassName());
-//            pstmt.setString(2, classroom.getTeacherId());
-//            pstmt.setString(3, classroom.getClassId());
-//            pstmt.executeUpdate();
-//        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
-//        }
+        String sql = "UPDATE classrooms SET class_name = ?, gvcn_id = ? WHERE class_id = ?";
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classroom.getClassName());
+            pstmt.setInt(2, classroom.getTeacherId());
+            pstmt.setInt(3, classroom.getClassId());
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("DEBUG: Updated " + rowsAffected + " rows for classroom " + classroom.getClassId());
+        } catch (SQLException e) {
+            System.out.println("Error updating classroom: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to update classroom: " + e.getMessage(), e);
+        }
     }
 
     public void deleteClassroom(String classroomId) {
