@@ -156,6 +156,24 @@ public class StudentManagementPanel extends JPanel {
         studentTable.setShowGrid(true);
         studentTable.setIntercellSpacing(new Dimension(0, 1));
         
+        // Add mouse listener for table clicks
+        studentTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = studentTable.rowAtPoint(evt.getPoint());
+                int col = studentTable.columnAtPoint(evt.getPoint());
+                
+                if (row >= 0 && col >= 0) {
+                    String columnName = studentTable.getColumnName(col);
+                    if ("Lớp".equals(columnName)) {
+                        handleClassClick(row);
+                    } else if ("Điểm".equals(columnName)) {
+                        handleGradeClick(row);
+                    }
+                }
+            }
+        });
+        
         // Customize table header
         JTableHeader header = studentTable.getTableHeader();
         header.setFont(new Font("Arial", Font.BOLD, 14));
@@ -180,17 +198,20 @@ public class StudentManagementPanel extends JPanel {
         JButton addButton = createStyledButton("Thêm học sinh", new Color(46, 204, 113));
         JButton editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
         JButton deleteButton = createStyledButton("Xóa học sinh", new Color(231, 76, 60));
+        JButton viewDetailsButton = createStyledButton("Xem chi tiết", new Color(155, 89, 182));
         JButton refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
         // Thêm action listeners
         addButton.addActionListener(e -> handleCreateStudent());
         editButton.addActionListener(e -> handleEditStudent());
         deleteButton.addActionListener(e -> handleDeleteStudent());
+        viewDetailsButton.addActionListener(e -> handleViewStudentDetails());
         refreshButton.addActionListener(e -> loadStudentData());
 
         buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
+        buttonPanel.add(viewDetailsButton);
         buttonPanel.add(refreshButton);
 
         return buttonPanel;
@@ -544,9 +565,9 @@ public class StudentManagementPanel extends JPanel {
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
-                studentController.deleteStudent(userId);
+            studentController.deleteStudent(userId);
                 JOptionPane.showMessageDialog(this, "Xóa học sinh thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                loadStudentData();
+            loadStudentData();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Lỗi khi xóa học sinh: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
@@ -570,18 +591,18 @@ public class StudentManagementPanel extends JPanel {
 
     private void displayStudents(List<Student> students) {
         tableModel.setRowCount(0);
-        for (Student student : students) {
-            Object[] rowData = {
-                    student.getUser().getUserId(),
-                    student.getStudentCode(),
-                    student.getUser().getFullName(),
-                    student.getUser().getEmail(),
-                    student.getUser().getPhoneNumber(),
-                    student.getUser().getGender(),
-                    student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa có lớp",
+            for (Student student : students) {
+                Object[] rowData = {
+                        student.getUser().getUserId(),
+                        student.getStudentCode(),
+                        student.getUser().getFullName(),
+                        student.getUser().getEmail(),
+                        student.getUser().getPhoneNumber(),
+                        student.getUser().getGender(),
+                        student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa có lớp",
                     student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm"
-            };
-            tableModel.addRow(rowData);
+                };
+                tableModel.addRow(rowData);
         }
     }
 
@@ -644,5 +665,111 @@ public class StudentManagementPanel extends JPanel {
             BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
         return comboBox;
+    }
+
+    private void handleClassClick(int row) {
+        if (row >= 0 && row < allStudents.size()) {
+            Student student = allStudents.get(row);
+            if (student.getClassroom() != null) {
+                String message = String.format(
+                    "Thông tin lớp học:\n\n" +
+                    "• Tên lớp: %s\n" +
+                    "• ID lớp: %d\n" +
+                    "• Sĩ số: %d học sinh\n" +
+                    "• GVCN: %s",
+                    student.getClassroom().getClassName(),
+                    student.getClassroom().getClassId(),
+                    student.getClassroom().getStudents().size(),
+                    student.getClassroom().getTeacher() != null ? 
+                        student.getClassroom().getTeacher().getUser().getFullName() : "Chưa có"
+                );
+                
+                JOptionPane.showMessageDialog(
+                    this, 
+                    message, 
+                    "Thông tin lớp học", 
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(this, "Học sinh chưa được phân lớp!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void handleGradeClick(int row) {
+        if (row >= 0 && row < allStudents.size()) {
+            Student student = allStudents.get(row);
+            if (student.getStudentGrade() != null) {
+                String message = String.format(
+                    "Điểm số học sinh:\n\n" +
+                    "• Họ tên: %s\n" +
+                    "• Mã SV: %s\n" +
+                    "• Điểm thường xuyên: %.2f\n" +
+                    "• Điểm giữa kỳ: %.2f\n" +
+                    "• Điểm cuối kỳ: %.2f\n" +
+                    "• Điểm trung bình: %.2f\n" +
+                    "• Xếp loại: %s",
+                    student.getUser().getFullName(),
+                    student.getStudentCode(),
+                    student.getStudentGrade().getRegularGrade(),
+                    student.getStudentGrade().getMidtermGrade(),
+                    student.getStudentGrade().getFinalGrade(),
+                    student.getStudentGrade().getAverageGrade(),
+                    student.getStudentGrade().getClassified() != null ? 
+                        student.getStudentGrade().getClassified().toString() : "Chưa xếp loại"
+                );
+                
+                JOptionPane.showMessageDialog(
+                    this, 
+                    message, 
+                    "Điểm số học sinh", 
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+            } else {
+                JOptionPane.showMessageDialog(this, "Học sinh chưa có điểm số!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
+    private void handleViewStudentDetails() {
+        int selectedRow = studentTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để xem chi tiết!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        if (selectedRow >= 0 && selectedRow < allStudents.size()) {
+            Student student = allStudents.get(selectedRow);
+            
+            String message = String.format(
+                "Thông tin chi tiết học sinh:\n\n" +
+                "• ID: %d\n" +
+                "• Mã SV: %s\n" +
+                "• Họ tên: %s\n" +
+                "• Email: %s\n" +
+                "• SĐT: %s\n" +
+                "• Giới tính: %s\n" +
+                "• Lớp: %s\n" +
+                "• Điểm TB: %s\n" +
+                "• Xếp loại: %s",
+                student.getUser().getUserId(),
+                student.getStudentCode(),
+                student.getUser().getFullName(),
+                student.getUser().getEmail(),
+                student.getUser().getPhoneNumber(),
+                student.getUser().getGender(),
+                student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa phân lớp",
+                student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm",
+                student.getStudentGrade() != null && student.getStudentGrade().getClassified() != null ? 
+                    student.getStudentGrade().getClassified().toString() : "Chưa xếp loại"
+            );
+
+            JOptionPane.showMessageDialog(
+                this, 
+                message, 
+                "Chi tiết học sinh", 
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }
 }

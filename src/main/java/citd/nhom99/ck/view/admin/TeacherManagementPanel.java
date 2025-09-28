@@ -153,6 +153,24 @@ public class TeacherManagementPanel extends JPanel {
         teacherTable.setShowGrid(true);
         teacherTable.setIntercellSpacing(new Dimension(0, 1));
         
+        // Add mouse listener for table clicks
+        teacherTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                int row = teacherTable.rowAtPoint(evt.getPoint());
+                int col = teacherTable.columnAtPoint(evt.getPoint());
+                
+                if (row >= 0 && col >= 0) {
+                    String columnName = teacherTable.getColumnName(col);
+                    if ("Lớp chủ nhiệm".equals(columnName)) {
+                        handleClassClick(row);
+                    } else if ("Môn dạy".equals(columnName)) {
+                        handleSubjectClick(row);
+                    }
+                }
+            }
+        });
+        
         // Customize table header
         JTableHeader header = teacherTable.getTableHeader();
         header.setFont(new Font("Arial", Font.BOLD, 14));
