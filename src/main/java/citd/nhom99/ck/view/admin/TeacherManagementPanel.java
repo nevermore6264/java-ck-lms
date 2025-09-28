@@ -254,56 +254,124 @@ public class TeacherManagementPanel extends JPanel {
     private void handleAddTeacher() {
         JDialog addNewTeacherDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Thêm giáo viên mới", true);
         addNewTeacherDialog.setLayout(new BorderLayout());
-        addNewTeacherDialog.setSize(400, 500);
+        addNewTeacherDialog.setSize(500, 600);
         addNewTeacherDialog.setLocationRelativeTo(null);
+        addNewTeacherDialog.getContentPane().setBackground(new Color(248, 249, 250));
+        addNewTeacherDialog.setResizable(false);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        formPanel.setBackground(new Color(248, 249, 250));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(15, 15, 15, 15);
         gbc.anchor = GridBagConstraints.WEST;
 
-        JTextField usernameField = new JTextField(20);
-        JPasswordField passwordField = new JPasswordField(20);
-        JTextField fullNameField = new JTextField(20);
-        JTextField emailField = new JTextField(20);
-        JTextField phoneNumberField = new JTextField(20);
+        JTextField usernameField = new JTextField();
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 16));
+        usernameField.setPreferredSize(new Dimension(300, 50));
+        usernameField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 16));
+        passwordField.setPreferredSize(new Dimension(300, 50));
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JTextField fullNameField = new JTextField();
+        fullNameField.setFont(new Font("Arial", Font.PLAIN, 16));
+        fullNameField.setPreferredSize(new Dimension(300, 50));
+        fullNameField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JTextField emailField = new JTextField();
+        emailField.setFont(new Font("Arial", Font.PLAIN, 16));
+        emailField.setPreferredSize(new Dimension(300, 50));
+        emailField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JTextField phoneNumberField = new JTextField();
+        phoneNumberField.setFont(new Font("Arial", Font.PLAIN, 16));
+        phoneNumberField.setPreferredSize(new Dimension(300, 50));
+        phoneNumberField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
         JComboBox<Gender> genderField = new JComboBox<>(Gender.values());
+        genderField.setFont(new Font("Arial", Font.PLAIN, 16));
+        genderField.setPreferredSize(new Dimension(300, 50));
+        genderField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
 
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Username:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(usernameField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(passwordField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Họ và tên:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(fullNameField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Email:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(emailField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Số điện thoại:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(phoneNumberField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Giới tính:"), gbc);
         gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(genderField, gbc);
 
         // Panel chứa form button
@@ -344,26 +412,246 @@ public class TeacherManagementPanel extends JPanel {
     }
 
     private void handleEditTeacher() {
-        System.out.println("Handle edit teacher clicked");
+        int selectedRow = teacherTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn giáo viên cần sửa.", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Teacher teacher = allTeachers.get(selectedRow);
+        if (teacher.getUser() == null) {
+            JOptionPane.showMessageDialog(this, "Không thể sửa thông tin giáo viên này.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Create edit dialog
+        JDialog editDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Sửa thông tin giáo viên", true);
+        editDialog.setLayout(new BorderLayout());
+        editDialog.setSize(500, 600);
+        editDialog.setLocationRelativeTo(null);
+        editDialog.getContentPane().setBackground(new Color(248, 249, 250));
+        editDialog.setResizable(false);
+
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(new Color(248, 249, 250));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        // Get current user data from database
+        User currentUser = teacher.getUser();
+        
+        JTextField usernameField = new JTextField();
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 16));
+        usernameField.setPreferredSize(new Dimension(300, 50));
+        usernameField.setText(currentUser.getUsername());
+        usernameField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 16));
+        passwordField.setPreferredSize(new Dimension(300, 50));
+        passwordField.setText(currentUser.getPassword());
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JTextField fullNameField = new JTextField();
+        fullNameField.setFont(new Font("Arial", Font.PLAIN, 16));
+        fullNameField.setPreferredSize(new Dimension(300, 50));
+        fullNameField.setText(currentUser.getFullName());
+        fullNameField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JTextField emailField = new JTextField();
+        emailField.setFont(new Font("Arial", Font.PLAIN, 16));
+        emailField.setPreferredSize(new Dimension(300, 50));
+        emailField.setText(currentUser.getEmail());
+        emailField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JTextField phoneNumberField = new JTextField();
+        phoneNumberField.setFont(new Font("Arial", Font.PLAIN, 16));
+        phoneNumberField.setPreferredSize(new Dimension(300, 50));
+        phoneNumberField.setText(currentUser.getPhoneNumber());
+        phoneNumberField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JComboBox<Gender> genderField = new JComboBox<>(Gender.values());
+        genderField.setFont(new Font("Arial", Font.PLAIN, 16));
+        genderField.setPreferredSize(new Dimension(300, 50));
+        genderField.setSelectedItem(currentUser.getGender());
+        genderField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+
+        // Add fields to form
+        gbc.gridx = 0; gbc.gridy = 0; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Username:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(usernameField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(passwordField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Họ và tên:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(fullNameField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Email:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(emailField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Số điện thoại:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(phoneNumberField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 5; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Giới tính:"), gbc);
+        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        formPanel.add(genderField, gbc);
+
+        // Button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        buttonPanel.setBackground(new Color(248, 249, 250));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JButton saveButton = new JButton("Lưu");
+        saveButton.setFont(new Font("Arial", Font.BOLD, 16));
+        saveButton.setPreferredSize(new Dimension(120, 45));
+        saveButton.setBackground(new Color(40, 167, 69));
+        saveButton.setForeground(Color.WHITE);
+        saveButton.setFocusPainted(false);
+        saveButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        JButton cancelButton = new JButton("Hủy");
+        cancelButton.setFont(new Font("Arial", Font.BOLD, 16));
+        cancelButton.setPreferredSize(new Dimension(120, 45));
+        cancelButton.setBackground(new Color(108, 117, 125));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+
+        saveButton.addActionListener(e -> {
+            // Validation
+            if (usernameField.getText().trim().isEmpty() || 
+                new String(passwordField.getPassword()).trim().isEmpty() ||
+                fullNameField.getText().trim().isEmpty() ||
+                emailField.getText().trim().isEmpty() ||
+                phoneNumberField.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(editDialog, "Vui lòng điền đầy đủ thông tin.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Email validation
+            if (!emailField.getText().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                JOptionPane.showMessageDialog(editDialog, "Email không hợp lệ.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Phone validation
+            if (!phoneNumberField.getText().matches("^[0-9]{10,11}$")) {
+                JOptionPane.showMessageDialog(editDialog, "Số điện thoại phải có 10-11 chữ số.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                // Create updated user
+                User updatedUser = new User();
+                updatedUser.setUserId(currentUser.getUserId());
+                updatedUser.setUsername(usernameField.getText().trim());
+                updatedUser.setPassword(new String(passwordField.getPassword()).trim());
+                updatedUser.setFullName(fullNameField.getText().trim());
+                updatedUser.setEmail(emailField.getText().trim());
+                updatedUser.setPhoneNumber(phoneNumberField.getText().trim());
+                updatedUser.setGender((Gender) genderField.getSelectedItem());
+                updatedUser.setRole(Role.TEACHER);
+
+                // Update teacher
+                teacher.setUser(updatedUser);
+                teacherController.updateTeacher(teacher);
+
+                JOptionPane.showMessageDialog(editDialog, "Cập nhật thông tin giáo viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                editDialog.dispose();
+                loadTeacherData();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(editDialog, "Lỗi khi cập nhật thông tin: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        cancelButton.addActionListener(e -> editDialog.dispose());
+
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        editDialog.add(formPanel, BorderLayout.CENTER);
+        editDialog.add(buttonPanel, BorderLayout.SOUTH);
+        editDialog.setVisible(true);
     }
 
     private void handleDeleteTeacher() {
-        System.out.println("Handle delete teacher clicked");
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Xin vui lòng chọn dòng cần xóa trước.", "Warning", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn giáo viên cần xóa.", "Thông báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int teacherUserId = (int) teacherTable.getValueAt(selectedRow, 0);
-        try {
-            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc xóa dữ liệu này?" + teacherUserId);
-            if (confirm == JOptionPane.YES_OPTION) {
-                teacherController.deleteTeacher(teacherUserId);
+
+        Teacher teacher = allTeachers.get(selectedRow);
+        if (teacher.getUser() == null) {
+            JOptionPane.showMessageDialog(this, "Không thể xóa giáo viên này.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Create detailed confirmation message
+        String message = String.format(
+            "Bạn có chắc chắn muốn xóa giáo viên này?\n\n" +
+            "• Mã GV: %s\n" +
+            "• Họ và tên: %s\n" +
+            "• Email: %s\n" +
+            "• Số điện thoại: %s\n" +
+            "• Giới tính: %s\n" +
+            "• Lớp chủ nhiệm: %s\n\n" +
+            "⚠️ Cảnh báo: Hành động này không thể hoàn tác!",
+            teacher.getTeacherCode(),
+            teacher.getUser().getFullName(),
+            teacher.getUser().getEmail(),
+            teacher.getUser().getPhoneNumber(),
+            teacher.getUser().getGender() != null ? teacher.getUser().getGender() : "Không xác định",
+            teacher.getClassroomId() != 0 ? "Lớp " + teacher.getClassroomId() : "Không chủ nhiệm"
+        );
+
+        int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            message, 
+            "Xác nhận xóa giáo viên", 
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                teacherController.deleteTeacher(teacher.getUser().getUserId());
                 loadTeacherData();
-                JOptionPane.showMessageDialog(this, "Đã xóa ID: " + teacherUserId);
+                JOptionPane.showMessageDialog(this, "Đã xóa giáo viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi xóa giáo viên: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -383,8 +671,8 @@ public class TeacherManagementPanel extends JPanel {
 
     private void displayTeachers(List<Teacher> teachers) {
         tableModel.setRowCount(0);
-        for (Teacher teacher : teachers) {
-            if (teacher.getUser() != null) {
+            for (Teacher teacher : teachers) {
+                if (teacher.getUser() != null) {
                 // Get classroom name
                 String classroomName = "Không chủ nhiệm";
                 if (teacher.getClassroomId() != 0) {
@@ -398,20 +686,20 @@ public class TeacherManagementPanel extends JPanel {
                         classroomName = "Lớp " + teacher.getClassroomId();
                     }
                 }
-                
-                Object[] rowData = {
-                        teacher.getUser().getUserId(),
-                        teacher.getTeacherCode(),
-                        teacher.getUser().getFullName(),
-                        teacher.getUser().getEmail(),
-                        teacher.getUser().getPhoneNumber(),
-                        teacher.getUser().getGender(),
+
+                    Object[] rowData = {
+                            teacher.getUser().getUserId(),
+                            teacher.getTeacherCode(),
+                            teacher.getUser().getFullName(),
+                            teacher.getUser().getEmail(),
+                            teacher.getUser().getPhoneNumber(),
+                            teacher.getUser().getGender(),
                         classroomName,
-                        teacher.getSubjectId()
-                };
-                tableModel.addRow(rowData);
+                            teacher.getSubjectId()
+                    };
+                    tableModel.addRow(rowData);
+                }
             }
-        }
     }
 
     private void performSearch() {
@@ -533,32 +821,107 @@ public class TeacherManagementPanel extends JPanel {
         if (selectedRow >= 0 && selectedRow < allTeachers.size()) {
             Teacher teacher = allTeachers.get(selectedRow);
             
-            String message = String.format(
-                "Thông tin chi tiết giáo viên:\n\n" +
-                "• ID: %d\n" +
-                "• Mã GV: %s\n" +
-                "• Họ tên: %s\n" +
-                "• Email: %s\n" +
-                "• SĐT: %s\n" +
-                "• Giới tính: %s\n" +
-                "• Lớp chủ nhiệm: %s\n" +
-                "• Môn dạy: %s",
-                teacher.getUser().getUserId(),
-                teacher.getTeacherCode(),
-                teacher.getUser().getFullName(),
-                teacher.getUser().getEmail(),
-                teacher.getUser().getPhoneNumber(),
-                teacher.getUser().getGender(),
-                teacher.getClassroomId() != 0 ? "Lớp " + teacher.getClassroomId() : "Chưa phân lớp",
-                teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"
-            );
+            // Create custom dialog
+            JDialog detailsDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết giáo viên", true);
+            detailsDialog.setLayout(new BorderLayout());
+            detailsDialog.setSize(500, 600);
+            detailsDialog.setLocationRelativeTo(null);
+            detailsDialog.getContentPane().setBackground(new Color(248, 249, 250));
+            detailsDialog.setResizable(false);
 
-            JOptionPane.showMessageDialog(
-                this, 
-                message, 
-                "Chi tiết giáo viên", 
-                JOptionPane.INFORMATION_MESSAGE
-            );
+            // Header panel
+            JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            headerPanel.setBackground(new Color(52, 58, 64));
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            
+            JLabel titleLabel = new JLabel("📋 Thông tin chi tiết giáo viên");
+            titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            titleLabel.setForeground(Color.WHITE);
+            headerPanel.add(titleLabel);
+            
+            // Content panel
+            JPanel contentPanel = new JPanel(new GridBagLayout());
+            contentPanel.setBackground(new Color(248, 249, 250));
+            contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+            
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(15, 15, 15, 15);
+            gbc.anchor = GridBagConstraints.WEST;
+            
+            // Get classroom name
+            String classroomName = "Chưa phân lớp";
+            if (teacher.getClassroomId() != 0) {
+                try {
+                    ClassroomDAO classroomDAO = new ClassroomDAO();
+                    Classroom classroom = classroomDAO.getClassroomById(teacher.getClassroomId());
+                    if (classroom != null) {
+                        classroomName = classroom.getClassName();
+                    }
+                } catch (Exception e) {
+                    classroomName = "Lớp " + teacher.getClassroomId();
+                }
+            }
+            
+            // Create info labels
+            String[][] infoData = {
+                {"👤 Mã giáo viên:", teacher.getTeacherCode()},
+                {"📝 Họ và tên:", teacher.getUser().getFullName()},
+                {"📧 Email:", teacher.getUser().getEmail()},
+                {"📱 Số điện thoại:", teacher.getUser().getPhoneNumber()},
+                {"⚧ Giới tính:", teacher.getUser().getGender() != null ? teacher.getUser().getGender().toString() : "Không xác định"},
+                {"🏫 Lớp chủ nhiệm:", classroomName},
+                {"📚 Môn dạy:", teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"},
+                {"🆔 ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
+            };
+            
+            for (int i = 0; i < infoData.length; i++) {
+                gbc.gridx = 0;
+                gbc.gridy = i;
+                gbc.fill = GridBagConstraints.NONE;
+                gbc.weightx = 0.0;
+                
+                JLabel label = new JLabel(infoData[i][0]);
+                label.setFont(new Font("Arial", Font.BOLD, 16));
+                label.setForeground(new Color(52, 58, 64));
+                label.setPreferredSize(new Dimension(200, 30));
+                contentPanel.add(label, gbc);
+                
+                gbc.gridx = 1;
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbc.weightx = 1.0;
+                
+                JLabel valueLabel = new JLabel(infoData[i][1]);
+                valueLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+                valueLabel.setForeground(new Color(73, 80, 87));
+                valueLabel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                ));
+                valueLabel.setOpaque(true);
+                valueLabel.setBackground(Color.WHITE);
+                contentPanel.add(valueLabel, gbc);
+            }
+            
+            // Button panel
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            buttonPanel.setBackground(new Color(248, 249, 250));
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            
+            JButton closeButton = new JButton("Đóng");
+            closeButton.setFont(new Font("Arial", Font.BOLD, 16));
+            closeButton.setPreferredSize(new Dimension(120, 45));
+            closeButton.setBackground(new Color(108, 117, 125));
+            closeButton.setForeground(Color.WHITE);
+            closeButton.setFocusPainted(false);
+            closeButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            closeButton.addActionListener(e -> detailsDialog.dispose());
+            
+            buttonPanel.add(closeButton);
+            
+            detailsDialog.add(headerPanel, BorderLayout.NORTH);
+            detailsDialog.add(contentPanel, BorderLayout.CENTER);
+            detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
+            detailsDialog.setVisible(true);
         }
     }
     
@@ -600,7 +963,7 @@ public class TeacherManagementPanel extends JPanel {
             try {
                 ClassroomDAO classroomDAO = new ClassroomDAO();
                 classrooms = classroomDAO.getAllClassrooms();
-            } catch (Exception e) {
+        } catch (Exception e) {
                 JOptionPane.showMessageDialog(dialog, "Lỗi khi tải danh sách lớp học: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }

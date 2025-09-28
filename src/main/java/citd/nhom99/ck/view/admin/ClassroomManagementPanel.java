@@ -314,27 +314,20 @@ public class ClassroomManagementPanel extends JPanel {
                 
                 JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Sửa thông tin lớp học", true);
                 dialog.setLayout(new BorderLayout());
-                dialog.setSize(500, 350);
+                dialog.setSize(500, 280);
                 dialog.setLocationRelativeTo(null);
                 dialog.getContentPane().setBackground(new Color(248, 249, 250));
                 dialog.setResizable(false);
                 
-                // Header panel
-                JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                headerPanel.setBackground(new Color(52, 144, 220));
-                headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-                JLabel headerLabel = new JLabel("Sửa thông tin lớp học");
-                headerLabel.setFont(new Font("Arial", Font.BOLD, 18));
-                headerLabel.setForeground(Color.WHITE);
-                headerPanel.add(headerLabel);
+                // Header panel - removed to make UI cleaner
                 
                 // Form panel
                 JPanel formPanel = new JPanel(new GridBagLayout());
                 formPanel.setBackground(new Color(248, 249, 250));
-                formPanel.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+                formPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
                 
                 GridBagConstraints gbc = new GridBagConstraints();
-                gbc.insets = new Insets(20, 20, 20, 20);
+                gbc.insets = new Insets(15, 15, 15, 15);
                 gbc.anchor = GridBagConstraints.WEST;
                 
                 // ID field (read-only)
@@ -343,18 +336,24 @@ public class ClassroomManagementPanel extends JPanel {
                 JLabel idLabel = new JLabel("ID lớp:");
                 idLabel.setFont(new Font("Arial", Font.BOLD, 16));
                 idLabel.setForeground(new Color(52, 58, 64));
+                idLabel.setPreferredSize(new Dimension(100, 30));
                 formPanel.add(idLabel, gbc);
                 
                 gbc.gridx = 1;
                 gbc.fill = GridBagConstraints.HORIZONTAL;
                 gbc.weightx = 1.0;
-                JTextField idField = new JTextField(String.valueOf(classroom.getClassId()));
+                JTextField idField = new JTextField();
+                String idText = "" + classroom.getClassId();
+                System.out.println("DEBUG: Classroom ID = " + classroom.getClassId() + ", Text = '" + idText + "'");
+                idField.setText(idText);
                 idField.setFont(new Font("Arial", Font.PLAIN, 16));
                 idField.setEditable(false);
                 idField.setBackground(new Color(240, 240, 240));
+                idField.setForeground(Color.BLACK);
+                idField.setPreferredSize(new Dimension(300, 40));
                 idField.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                    BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
                 ));
                 formPanel.add(idField, gbc);
                 
@@ -366,16 +365,20 @@ public class ClassroomManagementPanel extends JPanel {
                 JLabel nameLabel = new JLabel("Tên lớp:");
                 nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
                 nameLabel.setForeground(new Color(52, 58, 64));
+                nameLabel.setPreferredSize(new Dimension(100, 30));
                 formPanel.add(nameLabel, gbc);
                 
                 gbc.gridx = 1;
                 gbc.fill = GridBagConstraints.HORIZONTAL;
                 gbc.weightx = 1.0;
-                JTextField nameField = new JTextField(classroom.getClassName());
+                JTextField nameField = new JTextField();
+                nameField.setText(classroom.getClassName() != null ? classroom.getClassName() : "");
                 nameField.setFont(new Font("Arial", Font.PLAIN, 16));
+                nameField.setForeground(Color.BLACK);
+                nameField.setPreferredSize(new Dimension(300, 40));
                 nameField.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                    BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
                 ));
                 formPanel.add(nameField, gbc);
                 
@@ -405,7 +408,6 @@ public class ClassroomManagementPanel extends JPanel {
                 buttonPanel.add(saveButton);
                 buttonPanel.add(cancelButton);
                 
-                dialog.add(headerPanel, BorderLayout.NORTH);
                 dialog.add(formPanel, BorderLayout.CENTER);
                 dialog.add(buttonPanel, BorderLayout.SOUTH);
                 
@@ -420,9 +422,23 @@ public class ClassroomManagementPanel extends JPanel {
                             return;
                         }
                         
-                    classroom.setClassName(newClassName);
-                        // TODO: Update in database
-                        // classroomDAO.updateClassroom(classroom);
+                        // Validate class name format
+                        if (!newClassName.matches("^[0-9]+[A-Z][0-9]*$")) {
+                            JOptionPane.showMessageDialog(dialog, "Tên lớp phải có định dạng: số + chữ cái + số (VD: 12A1, 10C3)", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        
+                        classroom.setClassName(newClassName);
+                        
+                        // Update in database
+                        try {
+                            ClassroomDAO classroomDAO = new ClassroomDAO();
+                            classroomDAO.updateClassroom(classroom);
+                            System.out.println("DEBUG: Updated classroom " + classroom.getClassId() + " with name " + newClassName);
+                        } catch (Exception dbEx) {
+                            System.out.println("DEBUG: Error updating classroom in database: " + dbEx.getMessage());
+                            throw dbEx;
+                        }
                         
                         JOptionPane.showMessageDialog(dialog, "Cập nhật thông tin lớp học thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         dialog.dispose();
@@ -547,19 +563,12 @@ public class ClassroomManagementPanel extends JPanel {
             
             JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Gắn GVCN cho lớp " + classroom.getClassName(), true);
             dialog.setLayout(new BorderLayout());
-            dialog.setSize(500, 400);
+            dialog.setSize(500, 320);
             dialog.setLocationRelativeTo(null);
             dialog.getContentPane().setBackground(new Color(248, 249, 250));
             dialog.setResizable(false);
             
-            // Header panel
-            JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            headerPanel.setBackground(new Color(46, 204, 113));
-            headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
-            JLabel headerLabel = new JLabel("Gắn GVCN cho lớp: " + classroom.getClassName());
-            headerLabel.setFont(new Font("Arial", Font.BOLD, 18));
-            headerLabel.setForeground(Color.WHITE);
-            headerPanel.add(headerLabel);
+            // Header panel - removed to make UI cleaner
             
             // Form panel
             JPanel formPanel = new JPanel(new GridBagLayout());
@@ -639,7 +648,6 @@ public class ClassroomManagementPanel extends JPanel {
             buttonPanel.add(assignButton);
             buttonPanel.add(cancelButton);
             
-            dialog.add(headerPanel, BorderLayout.NORTH);
             dialog.add(formPanel, BorderLayout.CENTER);
             dialog.add(buttonPanel, BorderLayout.SOUTH);
             
