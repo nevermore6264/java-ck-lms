@@ -1,18 +1,17 @@
 package citd.nhom99.ck.model.dao;
 
-import citd.nhom99.ck.config.DBConfig;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.Teacher;
-import citd.nhom99.ck.model.User;
-import citd.nhom99.ck.utils.Helper;
-import citd.nhom99.ck.utils.QueryHelper;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import citd.nhom99.ck.config.DBConfig;
+import citd.nhom99.ck.model.Teacher;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.constant.Role;
+import citd.nhom99.ck.utils.Helper;
 
 public class TeacherDAO {
     private final UserDAO userDAO = new UserDAO();
@@ -61,6 +60,20 @@ public class TeacherDAO {
         String sql = "SELECT * FROM teachers WHERE teacher_code = ?";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, teacherId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractTeacherFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    public Teacher getTeacherByUserId(int userId) {
+        String sql = "SELECT * FROM teachers WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return extractTeacherFromResultSet(rs);

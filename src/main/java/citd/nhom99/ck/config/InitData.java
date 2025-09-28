@@ -1,117 +1,147 @@
 package citd.nhom99.ck.config;
 
-import citd.nhom99.ck.model.*;
-import citd.nhom99.ck.model.constant.Gender;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.dao.ClassroomDAO;
-import citd.nhom99.ck.utils.QueryHelper;
-
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 public class InitData {
 
-    public static void seedDatabaseIfEmpty() {
-        if (isDatabaseEmpty()) {
-            System.out.println("Database is empty. Seeding with sample data...");
-            createSampleData();
-        } else {
-            System.out.println("Database already contains data. Skipping seeding.");
+    public static void initializeSampleData() {
+        System.out.println("Initializing sample data...");
+        
+        try (Connection conn = DBConfig.getConnection();
+             Statement stmt = conn.createStatement()) {
+            
+            // Tạo dữ liệu mẫu cho users
+            insertSampleUsers(stmt);
+            
+            // Tạo dữ liệu mẫu cho subjects
+            insertSampleSubjects(stmt);
+            
+            // Tạo dữ liệu mẫu cho classrooms
+            insertSampleClassrooms(stmt);
+            
+            // Tạo dữ liệu mẫu cho teachers
+            insertSampleTeachers(stmt);
+            
+            // Tạo dữ liệu mẫu cho students
+            insertSampleStudents(stmt);
+            
+            // Tạo dữ liệu mẫu cho schedules
+            insertSampleSchedules(stmt);
+            
+            System.out.println("Sample data initialized successfully.");
+            
+        } catch (Exception e) {
+            System.err.println("Error initializing sample data:");
+            e.printStackTrace();
         }
     }
-
-    private static boolean isDatabaseEmpty() {
-        String sql = "SELECT COUNT(user_id) FROM users";
-        try (Connection conn = DBConfig.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            if (rs.next()) {
-                return rs.getInt(1) == 0;
-            }
-        } catch (SQLException e) {
-            return true;
+    
+    private static void insertSampleSubjects(Statement stmt) throws Exception {
+        String[] subjects = {
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (1, 'Toán')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (2, 'Lý')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (3, 'Hóa')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (4, 'Sinh')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (5, 'Văn')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (6, 'Sử')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (7, 'Địa')",
+            "INSERT OR IGNORE INTO subjects (subject_id, subject_name) VALUES (8, 'Anh')"
+        };
+        
+        for (String sql : subjects) {
+            stmt.execute(sql);
         }
-        return false;
     }
-
-    private static void createSampleData() {
-        // Admin
-        User admin = new User("admin", "admin", "Admin", "0987654321", "admin@admin.edu.vn", Gender.MALE, Role.ADMIN);
-        QueryHelper.insertUser(admin, Role.ADMIN);
-
-        // Thêm vào bảng môn học
-        QueryHelper.insertSubject("Math");
-        QueryHelper.insertSubject("Physics");
-        QueryHelper.insertSubject("Chemistry");
-        QueryHelper.insertSubject("Biology");
-        QueryHelper.insertSubject("Foreign Language");
-        QueryHelper.insertSubject("Literature");
-        QueryHelper.insertSubject("History");
-        QueryHelper.insertSubject("Geography");
-
-        // Thêm vào bảng học sinh
-        User student1 = new User("cuong.lv", "123456789", "Lê Văn Cường", "0911111111", "cuong.lv@student.edu.vn", Gender.MALE, Role.STUDENT);
-        User student2 = new User("dung.mt", "123456789", "Mai Thị Dung", "0911111112", "dung.mt@student.edu.vn", Gender.FEMALE, Role.STUDENT);
-        User student3 = new User("hoa.tt", "123456789", "Trần Thị Hoa", "0911111113", "hoa.tt@student.edu.vn", Gender.FEMALE, Role.STUDENT);
-        User student4 = new User("nam.nv", "123456789", "Nguyễn Văn Nam", "0911111114", "nam.nv@student.edu.vn", Gender.MALE, Role.STUDENT);
-        User student5 = new User("linh.ht", "123456789", "Hoàng Thị Linh", "0911111115", "linh.ht@student.edu.vn", Gender.FEMALE, Role.STUDENT);
-        User student6 = new User("hai.pv", "123456789", "Phạm Văn Hải", "0911111116", "hai.pv@student.edu.vn", Gender.MALE, Role.STUDENT);
-        User student7 = new User("trang.lt", "123456789", "Lê Thị Trang", "0911111117", "trang.lt@student.edu.vn", Gender.FEMALE, Role.STUDENT);
-        User student8 = new User("son.tv", "123456789", "Trần Văn Sơn", "0911111118", "son.tv@student.edu.vn", Gender.MALE, Role.STUDENT);
-        User student9 = new User("thao.tt", "123456789", "Nguyễn Thị Thảo", "0911111119", "thao.nt@student.edu.vn", Gender.FEMALE, Role.STUDENT);
-        User student10 = new User("tuan.hv", "123456789", "Hoàng Văn Tuấn", "0911111120", "tuan.hv@student.edu.vn", Gender.MALE, Role.STUDENT);
-
-        QueryHelper.insertStudent(student1);
-        QueryHelper.insertStudent(student2);
-        QueryHelper.insertStudent(student3);
-        QueryHelper.insertStudent(student4);
-        QueryHelper.insertStudent(student5);
-        QueryHelper.insertStudent(student6);
-        QueryHelper.insertStudent(student7);
-        QueryHelper.insertStudent(student8);
-        QueryHelper.insertStudent(student9);
-        QueryHelper.insertStudent(student10);
-
-        // Thêm vào bảng giáo viên
-        User teacher1 = new User("teacher1", "teacher1", "Nguyễn Văn An", "0901111111", "an.nv@edu.vn", Gender.MALE, Role.TEACHER);
-        User teacher2 = new User("teacher2", "teacher2", "Trần Thị Bình", "0901111112", "binh.tt@edu.vn", Gender.FEMALE, Role.TEACHER);
-        User teacher3 = new User("teacher3", "teacher3", "Lê Văn Cường", "0901111113", "cuong.lv@edu.vn", Gender.MALE, Role.TEACHER);
-        User teacher4 = new User("teacher4", "teacher4", "Phạm Thị Dung", "0901111114", "dung.pt@edu.vn", Gender.FEMALE, Role.TEACHER);
-        User teacher5 = new User("teacher5", "teacher5", "Hoàng Văn Hùng", "0901111115", "hung.hv@edu.vn", Gender.MALE, Role.TEACHER);
-        User teacher6 = new User("teacher6", "teacher6", "Ngô Thị Lan", "0901111116", "lan.nt@edu.vn", Gender.FEMALE, Role.TEACHER);
-        User teacher7 = new User("teacher7", "teacher7", "Vũ Văn Minh", "0901111117", "minh.vv@edu.vn", Gender.MALE, Role.TEACHER);
-        User teacher8 = new User("teacher8", "teacher8", "Đào Thị Nga", "0901111118", "nga.dt@edu.vn", Gender.FEMALE, Role.TEACHER);
-
-        QueryHelper.insertTeacher(teacher1, 1);
-        QueryHelper.insertTeacher(teacher2, 2);
-        QueryHelper.insertTeacher(teacher3, 3);
-        QueryHelper.insertTeacher(teacher4, 4);
-        QueryHelper.insertTeacher(teacher5, 5);
-        QueryHelper.insertTeacher(teacher6, 6);
-        QueryHelper.insertTeacher(teacher7, 7);
-        QueryHelper.insertTeacher(teacher8, 8);
-
-        // Thêm lớp
-        ClassroomDAO classroomDAO = new ClassroomDAO();
-
-        Classroom class10A1 = new Classroom("10A1", 12);
-        Classroom class10A2 = new Classroom("10A2");
-        Classroom class10A3 = new Classroom("10A3");
-        Classroom class11B1 = new Classroom("11B1");
-        Classroom class11B2 = new Classroom("11B2", 13);
-        Classroom class11B3 = new Classroom("11B3");
-        Classroom class12C1 = new Classroom("12C1");
-        Classroom class12C2 = new Classroom("12C2");
-        Classroom class12C3 = new Classroom("12C3", 14);
-
-        classroomDAO.createClassroom(class10A1);
-        classroomDAO.createClassroom(class10A2);
-        classroomDAO.createClassroom(class10A3);
-        classroomDAO.createClassroom(class11B1);
-        classroomDAO.createClassroom(class11B2);
-        classroomDAO.createClassroom(class11B3);
-        classroomDAO.createClassroom(class12C1);
-        classroomDAO.createClassroom(class12C2);
-        classroomDAO.createClassroom(class12C3);
+    
+    private static void insertSampleUsers(Statement stmt) throws Exception {
+        String[] users = {
+            // Admin user
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (1, 'admin', 'admin', 'Nguyễn Văn Admin', '0123456789', 'admin@school.edu.vn', 'MALE', 'ADMIN')",
+            
+            // Teacher users
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (2, 'teacher', 'teacher123', 'Trần Thị Giáo Viên', '0987654321', 'teacher@school.edu.vn', 'FEMALE', 'TEACHER')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (3, 'teacher1', 'teacher123', 'Lê Văn Toán', '0123456788', 'toan@school.edu.vn', 'MALE', 'TEACHER')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (4, 'teacher2', 'teacher123', 'Phạm Thị Lý', '0123456787', 'ly@school.edu.vn', 'FEMALE', 'TEACHER')",
+            
+            // Student users
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (5, 'student', 'student123', 'Hoàng Văn Học Sinh', '0123456786', 'student@school.edu.vn', 'MALE', 'STUDENT')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (6, 'student1', 'student123', 'Nguyễn Thị Lan', '0123456785', 'lan@school.edu.vn', 'FEMALE', 'STUDENT')",
+            "INSERT OR IGNORE INTO users (user_id, username, password, full_name, phone_number, email, gender, role) VALUES (7, 'student2', 'student123', 'Trần Văn Nam', '0123456784', 'nam@school.edu.vn', 'MALE', 'STUDENT')"
+        };
+        
+        for (String sql : users) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private static void insertSampleClassrooms(Statement stmt) throws Exception {
+        String[] classrooms = {
+            "INSERT OR IGNORE INTO classrooms (class_id, class_name, gvcn_id) VALUES (1, '10A1', 2)",
+            "INSERT OR IGNORE INTO classrooms (class_id, class_name, gvcn_id) VALUES (2, '10A2', 3)",
+            "INSERT OR IGNORE INTO classrooms (class_id, class_name, gvcn_id) VALUES (3, '11A1', 4)"
+        };
+        
+        for (String sql : classrooms) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private static void insertSampleTeachers(Statement stmt) throws Exception {
+        String[] teachers = {
+            "INSERT OR IGNORE INTO teachers (user_id, teacher_code, subject_id, classroom_id) VALUES (2, 'GV001', 1, 1)",
+            "INSERT OR IGNORE INTO teachers (user_id, teacher_code, subject_id, classroom_id) VALUES (3, 'GV002', 1, 2)",
+            "INSERT OR IGNORE INTO teachers (user_id, teacher_code, subject_id, classroom_id) VALUES (4, 'GV003', 2, 3)"
+        };
+        
+        for (String sql : teachers) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private static void insertSampleStudents(Statement stmt) throws Exception {
+        String[] students = {
+            "INSERT OR IGNORE INTO students (user_id, student_code, grade_id, class_id) VALUES (5, 'HS001', 1, 1)",
+            "INSERT OR IGNORE INTO students (user_id, student_code, grade_id, class_id) VALUES (6, 'HS002', 1, 1)",
+            "INSERT OR IGNORE INTO students (user_id, student_code, grade_id, class_id) VALUES (7, 'HS003', 1, 1)"
+        };
+        
+        for (String sql : students) {
+            stmt.execute(sql);
+        }
+    }
+    
+    private static void insertSampleSchedules(Statement stmt) throws Exception {
+        String[] schedules = {
+            // Thời khóa biểu cho lớp 10A1
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 1, 2, 'MONDAY', 1, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 2, 3, 'MONDAY', 2, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 3, 4, 'MONDAY', 3, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 5, 2, 'MONDAY', 4, 1, 10)",
+            
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 1, 2, 'TUESDAY', 1, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 4, 3, 'TUESDAY', 2, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 8, 4, 'TUESDAY', 3, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 6, 2, 'TUESDAY', 4, 1, 10)",
+            
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 2, 3, 'WEDNESDAY', 1, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 3, 4, 'WEDNESDAY', 2, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 7, 2, 'WEDNESDAY', 3, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 5, 3, 'WEDNESDAY', 4, 1, 10)",
+            
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 1, 2, 'THURSDAY', 1, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 4, 3, 'THURSDAY', 2, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 8, 4, 'THURSDAY', 3, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 6, 2, 'THURSDAY', 4, 1, 10)",
+            
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 2, 3, 'FRIDAY', 1, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 3, 4, 'FRIDAY', 2, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 7, 2, 'FRIDAY', 3, 1, 10)",
+            "INSERT OR IGNORE INTO schedules (classroom_id, subject_id, teacher_id, day_of_week, period, semester, academic_year) VALUES (1, 5, 3, 'FRIDAY', 4, 1, 10)"
+        };
+        
+        for (String sql : schedules) {
+            stmt.execute(sql);
+        }
     }
 }

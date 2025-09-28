@@ -1,11 +1,18 @@
 package citd.nhom99.ck.view;
 
-import citd.nhom99.ck.controller.AppController;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.User;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import citd.nhom99.ck.controller.AppController;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.constant.Role;
 
 public class SidebarPanel extends JPanel {
     public SidebarPanel(DashboardFrame parent, User user, AppController controller) {
@@ -26,10 +33,11 @@ public class SidebarPanel extends JPanel {
             addMenuButton("Quản lý Giáo viên", parent, null);
             addMenuButton("Quản lý Lớp học", parent, null);
         } else if (user.getRole() == Role.TEACHER) {
+            addMenuButton("Lịch dạy học", parent, null);
+            addMenuButton("Nhập điểm", parent, null);
             addMenuButton("Lớp học của tôi", parent, null);
-            addMenuButton("Sinh viên của tôi", parent, null);
         } else if (user.getRole() == Role.STUDENT) {
-            addMenuButton("Lớp học của tôi", parent, null);
+            addMenuButton("Thời khóa biểu", parent, null);
             addMenuButton("Điểm số", parent, null);
         }
 

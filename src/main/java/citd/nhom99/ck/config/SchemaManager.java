@@ -77,6 +77,23 @@ public class SchemaManager {
             );
             """;
 
+    private static final String CREATE_SCHEDULES_TABLE = """
+            CREATE TABLE IF NOT EXISTS schedules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                classroom_id INTEGER NOT NULL,
+                subject_id INTEGER NOT NULL,
+                teacher_id INTEGER NOT NULL,
+                day_of_week TEXT NOT NULL CHECK(day_of_week IN ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY')),
+                period INTEGER NOT NULL CHECK(period >= 1 AND period <= 12),
+                semester INTEGER CHECK(semester IN (1, 2)),
+                academic_year INTEGER CHECK(academic_year IN (10, 11, 12)),
+                FOREIGN KEY (classroom_id) REFERENCES classrooms(class_id) ON DELETE CASCADE,
+                FOREIGN KEY (subject_id) REFERENCES subjects(subject_id) ON DELETE CASCADE,
+                FOREIGN KEY (teacher_id) REFERENCES teachers(user_id) ON DELETE CASCADE,
+                UNIQUE(classroom_id, day_of_week, period, semester, academic_year)
+            );
+            """;
+
     public static void initializeDatabase() {
         System.out.println("Initializing database schema based on models...");
         try (Connection conn = DBConfig.getConnection();
@@ -88,6 +105,7 @@ public class SchemaManager {
             stmt.execute(CREATE_CLASSROOMS_TABLE);
             stmt.execute(CREATE_STUDENTS_TABLE);
             stmt.execute(CREATE_STUDENT_GRADE_TABLE);
+            stmt.execute(CREATE_SCHEDULES_TABLE);
 
             System.out.println("Database schema initialized successfully.");
 

@@ -1,18 +1,17 @@
 package citd.nhom99.ck.model.dao;
 
-import citd.nhom99.ck.config.DBConfig;
-import citd.nhom99.ck.model.StudentGrade;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.Student;
-import citd.nhom99.ck.model.User;
-import citd.nhom99.ck.utils.Helper;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import citd.nhom99.ck.config.DBConfig;
+import citd.nhom99.ck.model.Student;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.constant.Role;
+import citd.nhom99.ck.utils.Helper;
 
 public class StudentDAO {
     private final UserDAO userDAO = new UserDAO();
@@ -65,6 +64,10 @@ public class StudentDAO {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    public Student getStudentByUserId(int userId) {
+        return getStudentById(userId);
     }
 
     public List<Student> getAllStudents() {
