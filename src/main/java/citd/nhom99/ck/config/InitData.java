@@ -28,14 +28,99 @@ public class InitData {
             
             System.out.println("Sample data initialized successfully.");
             
-            System.out.println("Debug: Checking created users...");
-            try (ResultSet rs = stmt.executeQuery("SELECT username, password, role FROM users")) {
+            System.out.println("\n=== DEBUG: Checking created data ===");
+            
+            // Check Users
+            System.out.println("\n--- USERS ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT user_id, username, password, full_name, email, phone_number, gender, role FROM users ORDER BY user_id")) {
                 while (rs.next()) {
                     System.out.println("User: " + rs.getString("username") + 
                                      " | Password: " + rs.getString("password") + 
+                                     " | Full Name: " + rs.getString("full_name") +
+                                     " | Email: " + rs.getString("email") +
+                                     " | Phone: " + rs.getString("phone_number") +
+                                     " | Gender: " + rs.getString("gender") +
                                      " | Role: " + rs.getString("role"));
                 }
             }
+            
+            // Check Subjects
+            System.out.println("\n--- SUBJECTS ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT subject_id, subject_name FROM subjects ORDER BY subject_id")) {
+                while (rs.next()) {
+                    System.out.println("Subject ID: " + rs.getInt("subject_id") + 
+                                     " | Name: " + rs.getString("subject_name"));
+                }
+            }
+            
+            // Check Classrooms
+            System.out.println("\n--- CLASSROOMS ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT class_id, class_name, gvcn_id FROM classrooms ORDER BY class_id")) {
+                while (rs.next()) {
+                    System.out.println("Class ID: " + rs.getInt("class_id") + 
+                                     " | Name: " + rs.getString("class_name") +
+                                     " | GVCN ID: " + rs.getInt("gvcn_id"));
+                }
+            }
+            
+            // Check Teachers
+            System.out.println("\n--- TEACHERS ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT t.user_id, t.teacher_code, t.subject_id, t.classroom_id, u.full_name FROM teachers t LEFT JOIN users u ON t.user_id = u.user_id ORDER BY t.user_id")) {
+                while (rs.next()) {
+                    System.out.println("Teacher ID: " + rs.getInt("user_id") + 
+                                     " | Code: " + rs.getString("teacher_code") +
+                                     " | Subject ID: " + rs.getInt("subject_id") +
+                                     " | Classroom ID: " + rs.getInt("classroom_id") +
+                                     " | Full Name: " + rs.getString("full_name"));
+                }
+            }
+            
+            // Check Students
+            System.out.println("\n--- STUDENTS ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT s.user_id, s.student_code, s.grade_id, s.class_id, u.full_name, c.class_name FROM students s LEFT JOIN users u ON s.user_id = u.user_id LEFT JOIN classrooms c ON s.class_id = c.class_id ORDER BY s.user_id")) {
+                while (rs.next()) {
+                    System.out.println("Student ID: " + rs.getInt("user_id") + 
+                                     " | Code: " + rs.getString("student_code") +
+                                     " | Grade ID: " + rs.getInt("grade_id") +
+                                     " | Class ID: " + rs.getInt("class_id") +
+                                     " | Class Name: " + rs.getString("class_name") +
+                                     " | Full Name: " + rs.getString("full_name"));
+                }
+            }
+            
+            // Check Schedules
+            System.out.println("\n--- SCHEDULES ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT s.id, s.classroom_id, c.class_name, s.subject_id, sub.subject_name, s.teacher_id, u.full_name as teacher_name, s.day_of_week, s.period, s.semester, s.academic_year FROM schedules s LEFT JOIN classrooms c ON s.classroom_id = c.class_id LEFT JOIN subjects sub ON s.subject_id = sub.subject_id LEFT JOIN users u ON s.teacher_id = u.user_id ORDER BY s.classroom_id, s.day_of_week, s.period")) {
+                while (rs.next()) {
+                    System.out.println("Schedule ID: " + rs.getInt("id") + 
+                                     " | Class: " + rs.getString("class_name") + " (ID:" + rs.getInt("classroom_id") + ")" +
+                                     " | Subject: " + rs.getString("subject_name") + " (ID:" + rs.getInt("subject_id") + ")" +
+                                     " | Teacher: " + rs.getString("teacher_name") + " (ID:" + rs.getInt("teacher_id") + ")" +
+                                     " | Day: " + rs.getString("day_of_week") +
+                                     " | Period: " + rs.getInt("period") +
+                                     " | Semester: " + rs.getInt("semester") +
+                                     " | Academic Year: " + rs.getInt("academic_year"));
+                }
+            }
+            
+            // Check Student Grades
+            System.out.println("\n--- STUDENT GRADES ---");
+            try (ResultSet rs = stmt.executeQuery("SELECT sg.id, sg.student_id, s.student_code, u.full_name as student_name, sg.subject_id, sub.subject_name, sg.regular_grade, sg.midterm_grade, sg.final_grade, sg.average_grade, sg.classified, sg.semester, sg.academic_year FROM student_grades sg LEFT JOIN students s ON sg.student_id = s.user_id LEFT JOIN users u ON s.user_id = u.user_id LEFT JOIN subjects sub ON sg.subject_id = sub.subject_id ORDER BY sg.student_id, sg.subject_id")) {
+                while (rs.next()) {
+                    System.out.println("Grade ID: " + rs.getInt("id") + 
+                                     " | Student: " + rs.getString("student_name") + " (" + rs.getString("student_code") + ")" +
+                                     " | Subject: " + rs.getString("subject_name") + " (ID:" + rs.getInt("subject_id") + ")" +
+                                     " | Regular: " + rs.getDouble("regular_grade") +
+                                     " | Midterm: " + rs.getDouble("midterm_grade") +
+                                     " | Final: " + rs.getDouble("final_grade") +
+                                     " | Average: " + rs.getDouble("average_grade") +
+                                     " | Classified: " + rs.getString("classified") +
+                                     " | Semester: " + rs.getInt("semester") +
+                                     " | Academic Year: " + rs.getInt("academic_year"));
+                }
+            }
+            
+            System.out.println("\n=== END DEBUG ===\n");
             
         } catch (Exception e) {
             System.err.println("Error initializing sample data:");

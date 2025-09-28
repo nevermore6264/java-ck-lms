@@ -295,7 +295,7 @@ public class AccountPanel extends JPanel {
             user.setGender((Gender) genderComboBox.getSelectedItem());
 
             // Call the controller to save the changes
-            // controller.updateUser(user);
+            controller.updateUser(user);
 
             setFieldsEditable(false);
             JOptionPane.showMessageDialog(this, "Thông tin đã được cập nhật thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
