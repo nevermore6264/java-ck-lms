@@ -31,6 +31,7 @@ import javax.swing.table.JTableHeader;
 import citd.nhom99.ck.controller.ClassroomController;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Schedule;
+import citd.nhom99.ck.model.Student;
 import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.ScheduleDAO;
@@ -234,18 +235,21 @@ public class ClassroomManagementPanel extends JPanel {
         editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
         deleteButton = createStyledButton("Xóa lớp học", new Color(231, 76, 60));
         JButton assignTeacherButton = createStyledButton("Gắn GVCN", new Color(46, 204, 113));
+        JButton viewStudentsButton = createStyledButton("Xem danh sách học sinh", new Color(230, 126, 34));
         JButton viewScheduleButton = createStyledButton("Xem thời khóa biểu", new Color(155, 89, 182));
         refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
         editButton.addActionListener(e -> handleEditClassroom());
         deleteButton.addActionListener(e -> handleDeleteClassroom());
         assignTeacherButton.addActionListener(e -> handleAssignTeacher());
+        viewStudentsButton.addActionListener(e -> handleViewStudents());
         viewScheduleButton.addActionListener(e -> handleViewSchedule());
         refreshButton.addActionListener(e -> loadClassroomData());
 
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(assignTeacherButton);
+        buttonPanel.add(viewStudentsButton);
         buttonPanel.add(viewScheduleButton);
         buttonPanel.add(refreshButton);
 
@@ -695,5 +699,159 @@ public class ClassroomManagementPanel extends JPanel {
             
             dialog.setVisible(true);
         }
+    }
+    
+    private void handleViewStudents() {
+        int selectedRow = classroomTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một lớp học để xem danh sách học sinh!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (selectedRow >= 0 && selectedRow < allClassrooms.size()) {
+            Classroom classroom = allClassrooms.get(selectedRow);
+            
+            // Create dialog to display student list
+            JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Danh sách học sinh - " + classroom.getClassName(), true);
+            dialog.setLayout(new BorderLayout());
+            dialog.setSize(800, 600);
+            dialog.setLocationRelativeTo(null);
+            dialog.getContentPane().setBackground(new Color(248, 249, 250));
+            dialog.setResizable(true);
+            
+            // Header panel
+            JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            headerPanel.setBackground(new Color(52, 58, 64));
+            headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            
+            JLabel titleLabel = new JLabel("Danh sách học sinh lớp " + classroom.getClassName());
+            titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+            titleLabel.setForeground(Color.WHITE);
+            headerPanel.add(titleLabel);
+            
+            // Content panel with student table
+            JPanel contentPanel = new JPanel(new BorderLayout());
+            contentPanel.setBackground(new Color(248, 249, 250));
+            contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            
+            // Create student table
+            String[] columnNames = {"STT", "Mã HS", "Họ và tên", "Email", "Số điện thoại", "Giới tính"};
+            DefaultTableModel studentTableModel = new DefaultTableModel(columnNames, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
+            
+            JTable studentTable = new JTable(studentTableModel);
+            studentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            studentTable.setRowHeight(35);
+            studentTable.setFont(new Font("Arial", Font.PLAIN, 13));
+            studentTable.setGridColor(new Color(220, 220, 220));
+            studentTable.setShowGrid(true);
+            
+            // Customize table header
+            JTableHeader studentHeader = studentTable.getTableHeader();
+            studentHeader.setFont(new Font("Arial", Font.BOLD, 14));
+            studentHeader.setBackground(new Color(52, 58, 64));
+            studentHeader.setForeground(Color.WHITE);
+            studentHeader.setPreferredSize(new Dimension(studentHeader.getWidth(), 40));
+            
+            JScrollPane studentScrollPane = new JScrollPane(studentTable);
+            studentScrollPane.setBorder(BorderFactory.createEmptyBorder());
+            studentScrollPane.getViewport().setBackground(Color.WHITE);
+            
+            // Load student data
+            try {
+                ClassroomDAO classroomDAO = new ClassroomDAO();
+                Classroom fullClassroom = classroomDAO.getClassroomById(classroom.getClassId());
+                
+                if (fullClassroom != null && fullClassroom.getStudents() != null) {
+                    List<Student> students = fullClassroom.getStudents();
+                    
+                    for (int i = 0; i < students.size(); i++) {
+                        Student student = students.get(i);
+                        if (student != null && student.getUser() != null) {
+                            Object[] rowData = {
+                                i + 1,
+                                student.getStudentCode(),
+                                student.getUser().getFullName(),
+                                student.getUser().getEmail(),
+                                student.getUser().getPhoneNumber(),
+                                getGenderInVietnamese(student.getUser().getGender())
+                            };
+                            studentTableModel.addRow(rowData);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(dialog, "Lỗi khi tải danh sách học sinh: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+            
+            // Info panel showing class statistics
+            JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            infoPanel.setBackground(new Color(240, 248, 255));
+            infoPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+            ));
+            
+            int studentCount = studentTableModel.getRowCount();
+            JLabel infoLabel = new JLabel("Tổng số học sinh: " + studentCount + " học sinh");
+            infoLabel.setFont(new Font("Arial", Font.BOLD, 14));
+            infoLabel.setForeground(new Color(52, 58, 64));
+            infoPanel.add(infoLabel);
+            
+            // Button panel
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            buttonPanel.setBackground(new Color(248, 249, 250));
+            buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+            
+            JButton closeButton = new JButton("Đóng");
+            closeButton.setFont(new Font("Arial", Font.BOLD, 16));
+            closeButton.setPreferredSize(new Dimension(120, 45));
+            closeButton.setBackground(new Color(108, 117, 125));
+            closeButton.setForeground(Color.WHITE);
+            closeButton.setFocusPainted(false);
+            closeButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            closeButton.addActionListener(e -> dialog.dispose());
+            
+            // Add hover effect
+            closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    closeButton.setBackground(new Color(90, 98, 104));
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    closeButton.setBackground(new Color(108, 117, 125));
+                }
+            });
+            
+            buttonPanel.add(closeButton);
+            
+            // Add components to dialog
+            contentPanel.add(infoPanel, BorderLayout.NORTH);
+            contentPanel.add(studentScrollPane, BorderLayout.CENTER);
+            
+            dialog.add(headerPanel, BorderLayout.NORTH);
+            dialog.add(contentPanel, BorderLayout.CENTER);
+            dialog.add(buttonPanel, BorderLayout.SOUTH);
+            dialog.setVisible(true);
+        }
+    }
+    
+    // Helper method to convert gender to Vietnamese
+    private String getGenderInVietnamese(citd.nhom99.ck.model.constant.Gender gender) {
+        if (gender == null) {
+            return "Không xác định";
+        }
+        return switch (gender) {
+            case MALE -> "Nam";
+            case FEMALE -> "Nữ";
+            default -> "Không xác định";
+        };
     }
 }

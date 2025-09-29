@@ -28,6 +28,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import citd.nhom99.ck.controller.TeacherController;
 import citd.nhom99.ck.model.Classroom;
@@ -181,6 +182,9 @@ public class TeacherManagementPanel extends JPanel {
         header.setBackground(new Color(52, 58, 64));
         header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
+        
+        // Set custom renderer for "Lớp chủ nhiệm" column to make it appear clickable
+        teacherTable.getColumn("Lớp chủ nhiệm").setCellRenderer(new ClickableCellRenderer());
 
         JScrollPane scrollPane = new JScrollPane(teacherTable);
         scrollPane.setPreferredSize(new Dimension(1000, 500));
@@ -1168,6 +1172,46 @@ public class TeacherManagementPanel extends JPanel {
             });
             
             dialog.setVisible(true);
+        }
+    }
+    
+    // Custom cell renderer for clickable columns
+    private class ClickableCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
+            String cellValue = value != null ? value.toString() : "";
+            
+            // Only apply clickable styling if the teacher has a homeroom class
+            if (!cellValue.equals("Không chủ nhiệm") && !cellValue.isEmpty()) {
+                // Set blue color, bold, and italic for clickable appearance
+                setForeground(new Color(0, 100, 200)); // Blue color
+                setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 13)); // Bold and italic
+                
+                // Add underline to make it more obvious it's clickable
+                setText("<html><u>" + cellValue + "</u></html>");
+                
+                // Set cursor to hand cursor when hovering
+                setCursor(new Cursor(Cursor.HAND_CURSOR));
+                
+                // Add subtle background highlight for better visibility
+                if (!isSelected) {
+                    setBackground(new Color(240, 248, 255)); // Light blue background
+                }
+            } else {
+                // Normal styling for "Không chủ nhiệm" or empty values
+                setForeground(Color.BLACK);
+                setFont(new Font("Arial", Font.PLAIN, 13));
+                setText(cellValue);
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                
+                if (!isSelected) {
+                    setBackground(Color.WHITE);
+                }
+            }
+            
+            return this;
         }
     }
 }
