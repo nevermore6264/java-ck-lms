@@ -337,7 +337,7 @@ public class MyClassroomPanel extends JPanel {
 
     private void handleExport() {
         if (allStudents == null || allStudents.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Không có dữ liệu để xuất!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Không có dữ liệu để xuất!", "Cảnh báo");
             return;
         }
         

@@ -1,35 +1,5 @@
 package citd.nhom99.ck.view.admin;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.DefaultTableCellRenderer;
-
 import citd.nhom99.ck.controller.TeacherController;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
@@ -39,6 +9,14 @@ import citd.nhom99.ck.model.constant.Gender;
 import citd.nhom99.ck.model.constant.Role;
 import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.TeacherDAO;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TeacherManagementPanel extends JPanel {
     private final TeacherController teacherController = new TeacherController();
@@ -76,7 +54,7 @@ public class TeacherManagementPanel extends JPanel {
         // Title panel
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         titlePanel.setBackground(new Color(248, 249, 250));
-        
+
         JLabel titleLabel = new JLabel("Quản lý Giáo viên");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(new Color(52, 58, 64));
@@ -85,18 +63,18 @@ public class TeacherManagementPanel extends JPanel {
         // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         searchPanel.setBackground(new Color(248, 249, 250));
-        
+
         JLabel searchLabel = new JLabel("Tìm kiếm:");
         searchLabel.setFont(new Font("Arial", Font.BOLD, 14));
         searchLabel.setForeground(new Color(60, 60, 60));
-        
+
         searchField = new JTextField(20);
         searchField.setFont(new Font("Arial", Font.PLAIN, 14));
         searchField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
-        
+
         JButton searchButton = new JButton("Tìm kiếm");
         searchButton.setFont(new Font("Arial", Font.BOLD, 12));
         searchButton.setBackground(new Color(52, 144, 220));
@@ -104,19 +82,20 @@ public class TeacherManagementPanel extends JPanel {
         searchButton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         searchButton.setFocusPainted(false);
         searchButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // Add hover effect
         searchButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 searchButton.setBackground(new Color(41, 128, 185));
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 searchButton.setBackground(new Color(52, 144, 220));
             }
         });
-        
+
         // Add search functionality
         searchButton.addActionListener(e -> performSearch());
         searchField.addActionListener(e -> performSearch());
@@ -135,8 +114,8 @@ public class TeacherManagementPanel extends JPanel {
         JPanel tablePanel = new JPanel(new BorderLayout());
         tablePanel.setBackground(new Color(248, 249, 250));
         tablePanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
 
         // Tạo table model với các cột
@@ -158,14 +137,14 @@ public class TeacherManagementPanel extends JPanel {
         teacherTable.setGridColor(new Color(220, 220, 220));
         teacherTable.setShowGrid(true);
         teacherTable.setIntercellSpacing(new Dimension(0, 1));
-        
+
         // Add mouse listener for table clicks
         teacherTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 int row = teacherTable.rowAtPoint(evt.getPoint());
                 int col = teacherTable.columnAtPoint(evt.getPoint());
-                
+
                 if (row >= 0 && col >= 0) {
                     String columnName = teacherTable.getColumnName(col);
                     if ("Lớp chủ nhiệm".equals(columnName)) {
@@ -176,14 +155,14 @@ public class TeacherManagementPanel extends JPanel {
                 }
             }
         });
-        
+
         // Customize table header
         JTableHeader header = teacherTable.getTableHeader();
         header.setFont(new Font("Arial", Font.BOLD, 14));
         header.setBackground(new Color(52, 58, 64));
         header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getWidth(), 40));
-        
+
         // Set custom renderer for "Lớp chủ nhiệm" column to make it appear clickable
         teacherTable.getColumn("Lớp chủ nhiệm").setCellRenderer(new ClickableCellRenderer());
 
@@ -234,25 +213,26 @@ public class TeacherManagementPanel extends JPanel {
         button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // Add hover effect
         Color hoverColor = new Color(
-            Math.max(0, backgroundColor.getRed() - 20),
-            Math.max(0, backgroundColor.getGreen() - 20),
-            Math.max(0, backgroundColor.getBlue() - 20)
+                Math.max(0, backgroundColor.getRed() - 20),
+                Math.max(0, backgroundColor.getGreen() - 20),
+                Math.max(0, backgroundColor.getBlue() - 20)
         );
-        
+
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(hoverColor);
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(backgroundColor);
             }
         });
-        
+
         return button;
     }
 
@@ -275,48 +255,48 @@ public class TeacherManagementPanel extends JPanel {
         usernameField.setFont(new Font("Arial", Font.PLAIN, 16));
         usernameField.setPreferredSize(new Dimension(300, 50));
         usernameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(new Font("Arial", Font.PLAIN, 16));
         passwordField.setPreferredSize(new Dimension(300, 50));
         passwordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JTextField fullNameField = new JTextField();
         fullNameField.setFont(new Font("Arial", Font.PLAIN, 16));
         fullNameField.setPreferredSize(new Dimension(300, 50));
         fullNameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JTextField emailField = new JTextField();
         emailField.setFont(new Font("Arial", Font.PLAIN, 16));
         emailField.setPreferredSize(new Dimension(300, 50));
         emailField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JTextField phoneNumberField = new JTextField();
         phoneNumberField.setFont(new Font("Arial", Font.PLAIN, 16));
         phoneNumberField.setPreferredSize(new Dimension(300, 50));
         phoneNumberField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JComboBox<Gender> genderField = new JComboBox<>(Gender.values());
         genderField.setFont(new Font("Arial", Font.PLAIN, 16));
         genderField.setPreferredSize(new Dimension(300, 50));
         genderField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
 
         gbc.gridx = 0;
@@ -383,7 +363,7 @@ public class TeacherManagementPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
         buttonPanel.setBackground(new Color(248, 249, 250));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
+
         JButton saveButton = new JButton("Lưu");
         saveButton.setFont(new Font("Arial", Font.BOLD, 16));
         saveButton.setPreferredSize(new Dimension(120, 45));
@@ -392,7 +372,7 @@ public class TeacherManagementPanel extends JPanel {
         saveButton.setFocusPainted(false);
         saveButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         saveButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         JButton cancelButton = new JButton("Hủy");
         cancelButton.setFont(new Font("Arial", Font.BOLD, 16));
         cancelButton.setPreferredSize(new Dimension(120, 45));
@@ -404,30 +384,32 @@ public class TeacherManagementPanel extends JPanel {
 
         buttonPanel.add(saveButton);
         buttonPanel.add(cancelButton);
-        
+
         // Add hover effects
         saveButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 saveButton.setBackground(new Color(34, 139, 34));
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 saveButton.setBackground(new Color(40, 167, 69));
             }
         });
-        
+
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 cancelButton.setBackground(new Color(90, 98, 104));
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 cancelButton.setBackground(new Color(108, 117, 125));
             }
         });
-        
+
         // Add cancel action
         cancelButton.addActionListener(e -> addNewTeacherDialog.dispose());
 
@@ -492,90 +474,120 @@ public class TeacherManagementPanel extends JPanel {
 
         // Get current user data from database
         User currentUser = teacher.getUser();
-        
+
         JTextField usernameField = new JTextField();
         usernameField.setFont(new Font("Arial", Font.PLAIN, 16));
         usernameField.setPreferredSize(new Dimension(300, 50));
         usernameField.setText(currentUser.getUsername());
         usernameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JPasswordField passwordField = new JPasswordField();
         passwordField.setFont(new Font("Arial", Font.PLAIN, 16));
         passwordField.setPreferredSize(new Dimension(300, 50));
         passwordField.setText(currentUser.getPassword());
         passwordField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JTextField fullNameField = new JTextField();
         fullNameField.setFont(new Font("Arial", Font.PLAIN, 16));
         fullNameField.setPreferredSize(new Dimension(300, 50));
         fullNameField.setText(currentUser.getFullName());
         fullNameField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JTextField emailField = new JTextField();
         emailField.setFont(new Font("Arial", Font.PLAIN, 16));
         emailField.setPreferredSize(new Dimension(300, 50));
         emailField.setText(currentUser.getEmail());
         emailField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JTextField phoneNumberField = new JTextField();
         phoneNumberField.setFont(new Font("Arial", Font.PLAIN, 16));
         phoneNumberField.setPreferredSize(new Dimension(300, 50));
         phoneNumberField.setText(currentUser.getPhoneNumber());
         phoneNumberField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
-        
+
         JComboBox<Gender> genderField = new JComboBox<>(Gender.values());
         genderField.setFont(new Font("Arial", Font.PLAIN, 16));
         genderField.setPreferredSize(new Dimension(300, 50));
         genderField.setSelectedItem(currentUser.getGender());
         genderField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
 
         // Add fields to form
-        gbc.gridx = 0; gbc.gridy = 0; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Username:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(usernameField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Password:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(passwordField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Họ và tên:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(fullNameField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(emailField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Số điện thoại:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(phoneNumberField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.fill = GridBagConstraints.NONE; gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
         formPanel.add(new JLabel("Giới tính:"), gbc);
-        gbc.gridx = 1; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
+        gbc.gridx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         formPanel.add(genderField, gbc);
 
         // Button panel
@@ -600,24 +612,26 @@ public class TeacherManagementPanel extends JPanel {
         cancelButton.setFocusPainted(false);
         cancelButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // Add hover effects
         saveButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 saveButton.setBackground(new Color(34, 139, 34));
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 saveButton.setBackground(new Color(40, 167, 69));
             }
         });
-        
+
         cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 cancelButton.setBackground(new Color(90, 98, 104));
             }
+
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 cancelButton.setBackground(new Color(108, 117, 125));
@@ -626,11 +640,11 @@ public class TeacherManagementPanel extends JPanel {
 
         saveButton.addActionListener(e -> {
             // Validation
-            if (usernameField.getText().trim().isEmpty() || 
-                new String(passwordField.getPassword()).trim().isEmpty() ||
-                fullNameField.getText().trim().isEmpty() ||
-                emailField.getText().trim().isEmpty() ||
-                phoneNumberField.getText().trim().isEmpty()) {
+            if (usernameField.getText().trim().isEmpty() ||
+                    new String(passwordField.getPassword()).trim().isEmpty() ||
+                    fullNameField.getText().trim().isEmpty() ||
+                    emailField.getText().trim().isEmpty() ||
+                    phoneNumberField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(editDialog, "Vui lòng điền đầy đủ thông tin.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -696,28 +710,28 @@ public class TeacherManagementPanel extends JPanel {
 
         // Create detailed confirmation message
         String message = String.format(
-            "Bạn có chắc chắn muốn xóa giáo viên này?\n\n" +
-            "• Mã GV: %s\n" +
-            "• Họ và tên: %s\n" +
-            "• Email: %s\n" +
-            "• Số điện thoại: %s\n" +
-            "• Giới tính: %s\n" +
-            "• Lớp chủ nhiệm: %s\n\n" +
-            "⚠️ Cảnh báo: Hành động này không thể hoàn tác!",
-            teacher.getTeacherCode(),
-            teacher.getUser().getFullName(),
-            teacher.getUser().getEmail(),
-            teacher.getUser().getPhoneNumber(),
-            teacher.getUser().getGender() != null ? teacher.getUser().getGender() : "Không xác định",
-            teacher.getClassroomId() != 0 ? "Lớp " + teacher.getClassroomId() : "Không chủ nhiệm"
+                "Bạn có chắc chắn muốn xóa giáo viên này?\n\n" +
+                        "• Mã GV: %s\n" +
+                        "• Họ và tên: %s\n" +
+                        "• Email: %s\n" +
+                        "• Số điện thoại: %s\n" +
+                        "• Giới tính: %s\n" +
+                        "• Lớp chủ nhiệm: %s\n\n" +
+                        "⚠️ Cảnh báo: Hành động này không thể hoàn tác!",
+                teacher.getTeacherCode(),
+                teacher.getUser().getFullName(),
+                teacher.getUser().getEmail(),
+                teacher.getUser().getPhoneNumber(),
+                teacher.getUser().getGender() != null ? teacher.getUser().getGender() : "Không xác định",
+                teacher.getClassroomId() != 0 ? "Lớp " + teacher.getClassroomId() : "Không chủ nhiệm"
         );
 
         int confirm = JOptionPane.showConfirmDialog(
-            this, 
-            message, 
-            "Xác nhận xóa giáo viên", 
-            JOptionPane.YES_NO_OPTION, 
-            JOptionPane.WARNING_MESSAGE
+                this,
+                message,
+                "Xác nhận xóa giáo viên",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
@@ -737,7 +751,7 @@ public class TeacherManagementPanel extends JPanel {
         try {
             allTeachers = teacherController.getAllTeachers();
             displayTeachers(allTeachers);
-            
+
             // Check for data inconsistencies (only in debug mode)
             if (System.getProperty("debug") != null) {
                 ClassroomDAO classroomDAO = new ClassroomDAO();
@@ -753,8 +767,8 @@ public class TeacherManagementPanel extends JPanel {
 
     private void displayTeachers(List<Teacher> teachers) {
         tableModel.setRowCount(0);
-            for (Teacher teacher : teachers) {
-                if (teacher.getUser() != null) {
+        for (Teacher teacher : teachers) {
+            if (teacher.getUser() != null) {
                 // Get classroom name by finding classroom where this teacher is GVCN
                 String classroomName = "Không chủ nhiệm";
                 try {
@@ -770,24 +784,24 @@ public class TeacherManagementPanel extends JPanel {
                     classroomName = "Không chủ nhiệm";
                 }
 
-                    Object[] rowData = {
-                            teacher.getUser().getUserId(),
-                            teacher.getTeacherCode(),
-                            teacher.getUser().getFullName(),
-                            teacher.getUser().getEmail(),
-                            teacher.getUser().getPhoneNumber(),
-                            getGenderInVietnamese(teacher.getUser().getGender()),
+                Object[] rowData = {
+                        teacher.getUser().getUserId(),
+                        teacher.getTeacherCode(),
+                        teacher.getUser().getFullName(),
+                        teacher.getUser().getEmail(),
+                        teacher.getUser().getPhoneNumber(),
+                        getGenderInVietnamese(teacher.getUser().getGender()),
                         classroomName,
-                            teacher.getSubjectId()
-                    };
-                    tableModel.addRow(rowData);
-                }
+                        teacher.getSubjectId()
+                };
+                tableModel.addRow(rowData);
             }
+        }
     }
 
     private void performSearch() {
         if (allTeachers == null) return;
-        
+
         String searchText = searchField.getText().toLowerCase().trim();
         if (searchText.isEmpty()) {
             displayTeachers(allTeachers);
@@ -795,13 +809,13 @@ public class TeacherManagementPanel extends JPanel {
         }
 
         List<Teacher> filteredTeachers = allTeachers.stream()
-                .filter(teacher -> 
-                    teacher.getUser() != null && (
-                        teacher.getUser().getFullName().toLowerCase().contains(searchText) ||
-                        teacher.getTeacherCode().toLowerCase().contains(searchText) ||
-                        teacher.getUser().getEmail().toLowerCase().contains(searchText) ||
-                        teacher.getUser().getPhoneNumber().toLowerCase().contains(searchText)
-                    )
+                .filter(teacher ->
+                        teacher.getUser() != null && (
+                                teacher.getUser().getFullName().toLowerCase().contains(searchText) ||
+                                        teacher.getTeacherCode().toLowerCase().contains(searchText) ||
+                                        teacher.getUser().getEmail().toLowerCase().contains(searchText) ||
+                                        teacher.getUser().getPhoneNumber().toLowerCase().contains(searchText)
+                        )
                 )
                 .collect(java.util.stream.Collectors.toList());
 
@@ -823,68 +837,60 @@ public class TeacherManagementPanel extends JPanel {
     private void handleClassClick(int row) {
         if (row >= 0 && row < allTeachers.size()) {
             Teacher teacher = allTeachers.get(row);
-            
+
             // Find classroom where this teacher is GVCN
-            try {
-                ClassroomDAO classroomDAO = new ClassroomDAO();
-                List<Classroom> allClassrooms = classroomDAO.getAllClassrooms();
-                Classroom classroom = null;
-                for (Classroom c : allClassrooms) {
-                    if (c.getTeacherId() == teacher.getUser().getUserId()) {
-                        classroom = c;
-                        break;
-                    }
+            ClassroomDAO classroomDAO = new ClassroomDAO();
+            List<Classroom> allClassrooms = classroomDAO.getAllClassrooms();
+            Classroom classroom = null;
+            for (Classroom c : allClassrooms) {
+                if (c.getTeacherId() == teacher.getUser().getUserId()) {
+                    classroom = c;
+                    break;
                 }
-                
-                if (classroom != null) {
-                    
-                    if (classroom != null) {
-                        // Build student list
-                        StringBuilder studentList = new StringBuilder();
-                        if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
-                            studentList.append("Danh sách học sinh:\n");
-                            for (int i = 0; i < classroom.getStudents().size(); i++) {
-                                Student student = classroom.getStudents().get(i);
-                                if (student != null && student.getUser() != null) {
-                                    studentList.append(String.format("%d. %s (%s)\n", 
-                                        i + 1, 
-                                        student.getUser().getFullName(),
-                                        student.getStudentCode()));
-                                } else {
-                                    studentList.append(String.format("%d. [Dữ liệu không hợp lệ]\n", i + 1));
-                                }
-                            }
+            }
+
+            if (classroom != null) {
+
+                // Build student list
+                StringBuilder studentList = new StringBuilder();
+                if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
+                    studentList.append("Danh sách học sinh:\n");
+                    for (int i = 0; i < classroom.getStudents().size(); i++) {
+                        Student student = classroom.getStudents().get(i);
+                        if (student != null && student.getUser() != null) {
+                            studentList.append(String.format("%d. %s (%s)\n",
+                                    i + 1,
+                                    student.getUser().getFullName(),
+                                    student.getStudentCode()));
                         } else {
-                            studentList.append("Lớp chưa có học sinh nào.");
+                            studentList.append(String.format("%d. [Dữ liệu không hợp lệ]\n", i + 1));
                         }
-                        
-                        String message = String.format(
-                            "Thông tin lớp chủ nhiệm:\n\n" +
-                            "• Giáo viên: %s\n" +
-                            "• Mã GV: %s\n" +
-                            "• Lớp chủ nhiệm: %s\n" +
-                            "• Sĩ số: %d học sinh\n\n" +
-                            "%s",
-                            teacher.getUser().getFullName(),
-                            teacher.getTeacherCode(),
-                            classroom.getClassName(),
-                            classroom.getStudents() != null ? classroom.getStudents().size() : 0,
-                            studentList.toString()
-                        );
-                        
-                        JOptionPane.showMessageDialog(
-                            this, 
-                            message, 
-                            "Thông tin lớp chủ nhiệm", 
-                            JOptionPane.INFORMATION_MESSAGE
-                        );
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin lớp học!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(this, "Lỗi khi tải thông tin lớp: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-                    e.printStackTrace();
+                } else {
+                    studentList.append("Lớp chưa có học sinh nào.");
                 }
+
+                String message = String.format(
+                        "Thông tin lớp chủ nhiệm:\n\n" +
+                                "• Giáo viên: %s\n" +
+                                "• Mã GV: %s\n" +
+                                "• Lớp chủ nhiệm: %s\n" +
+                                "• Sĩ số: %d học sinh\n\n" +
+                                "%s",
+                        teacher.getUser().getFullName(),
+                        teacher.getTeacherCode(),
+                        classroom.getClassName(),
+                        classroom.getStudents() != null ? classroom.getStudents().size() : 0,
+                        studentList.toString()
+                );
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        message,
+                        "Thông tin lớp chủ nhiệm",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+
             } else {
                 JOptionPane.showMessageDialog(this, "Giáo viên chưa được phân lớp chủ nhiệm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             }
@@ -896,22 +902,22 @@ public class TeacherManagementPanel extends JPanel {
             Teacher teacher = allTeachers.get(row);
             if (teacher.getSubjectId() != 0) {
                 String message = String.format(
-                    "Thông tin môn dạy:\n\n" +
-                    "• Giáo viên: %s\n" +
-                    "• Mã GV: %s\n" +
-                    "• Môn dạy: %s\n" +
-                    "• ID môn: %d",
-                    teacher.getUser().getFullName(),
-                    teacher.getTeacherCode(),
-                    "Môn " + teacher.getSubjectId(),
-                    teacher.getSubjectId()
+                        "Thông tin môn dạy:\n\n" +
+                                "• Giáo viên: %s\n" +
+                                "• Mã GV: %s\n" +
+                                "• Môn dạy: %s\n" +
+                                "• ID môn: %d",
+                        teacher.getUser().getFullName(),
+                        teacher.getTeacherCode(),
+                        "Môn " + teacher.getSubjectId(),
+                        teacher.getSubjectId()
                 );
-                
+
                 JOptionPane.showMessageDialog(
-                    this, 
-                    message, 
-                    "Thông tin môn dạy", 
-                    JOptionPane.INFORMATION_MESSAGE
+                        this,
+                        message,
+                        "Thông tin môn dạy",
+                        JOptionPane.INFORMATION_MESSAGE
                 );
             } else {
                 JOptionPane.showMessageDialog(this, "Giáo viên chưa được phân môn dạy!", "Thông báo", JOptionPane.WARNING_MESSAGE);
@@ -928,7 +934,7 @@ public class TeacherManagementPanel extends JPanel {
 
         if (selectedRow >= 0 && selectedRow < allTeachers.size()) {
             Teacher teacher = allTeachers.get(selectedRow);
-            
+
             // Create custom dialog
             JDialog detailsDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết giáo viên", true);
             detailsDialog.setLayout(new BorderLayout());
@@ -942,21 +948,21 @@ public class TeacherManagementPanel extends JPanel {
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             headerPanel.setBackground(new Color(52, 58, 64));
             headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-            
+
             JLabel titleLabel = new JLabel("📋 Thông tin chi tiết giáo viên");
             titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
             titleLabel.setForeground(Color.WHITE);
             headerPanel.add(titleLabel);
-            
+
             // Content panel
             JPanel contentPanel = new JPanel(new GridBagLayout());
             contentPanel.setBackground(new Color(248, 249, 250));
             contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
-            
+
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.insets = new Insets(15, 15, 15, 15);
             gbc.anchor = GridBagConstraints.WEST;
-            
+
             // Get classroom name
             String classroomName = "Chưa phân lớp";
             if (teacher.getClassroomId() != 0) {
@@ -970,52 +976,52 @@ public class TeacherManagementPanel extends JPanel {
                     classroomName = "Lớp " + teacher.getClassroomId();
                 }
             }
-            
+
             // Create info labels
             String[][] infoData = {
-                {"Mã giáo viên:", teacher.getTeacherCode()},
-                {"Họ và tên:", teacher.getUser().getFullName()},
-                {"Email:", teacher.getUser().getEmail()},
-                {"Số điện thoại:", teacher.getUser().getPhoneNumber()},
-                {"Giới tính:", getGenderInVietnamese(teacher.getUser().getGender())},
-                {"Lớp chủ nhiệm:", classroomName},
-                {"Môn dạy:", teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"},
-                {"ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
+                    {"Mã giáo viên:", teacher.getTeacherCode()},
+                    {"Họ và tên:", teacher.getUser().getFullName()},
+                    {"Email:", teacher.getUser().getEmail()},
+                    {"Số điện thoại:", teacher.getUser().getPhoneNumber()},
+                    {"Giới tính:", getGenderInVietnamese(teacher.getUser().getGender())},
+                    {"Lớp chủ nhiệm:", classroomName},
+                    {"Môn dạy:", teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"},
+                    {"ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
             };
-            
+
             for (int i = 0; i < infoData.length; i++) {
                 gbc.gridx = 0;
                 gbc.gridy = i;
                 gbc.fill = GridBagConstraints.NONE;
                 gbc.weightx = 0.0;
-                
+
                 JLabel label = new JLabel(infoData[i][0]);
                 label.setFont(new Font("Arial", Font.BOLD, 16));
                 label.setForeground(new Color(52, 58, 64));
                 label.setPreferredSize(new Dimension(180, 30));
                 contentPanel.add(label, gbc);
-                
+
                 gbc.gridx = 1;
                 gbc.fill = GridBagConstraints.HORIZONTAL;
                 gbc.weightx = 1.0;
-                
+
                 JLabel valueLabel = new JLabel(infoData[i][1]);
                 valueLabel.setFont(new Font("Arial", Font.PLAIN, 16));
                 valueLabel.setForeground(new Color(73, 80, 87));
                 valueLabel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                        BorderFactory.createEmptyBorder(10, 15, 10, 15)
                 ));
                 valueLabel.setOpaque(true);
                 valueLabel.setBackground(Color.WHITE);
                 contentPanel.add(valueLabel, gbc);
             }
-            
+
             // Button panel
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             buttonPanel.setBackground(new Color(248, 249, 250));
             buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-            
+
             JButton closeButton = new JButton("Đóng");
             closeButton.setFont(new Font("Arial", Font.BOLD, 16));
             closeButton.setPreferredSize(new Dimension(120, 45));
@@ -1025,44 +1031,45 @@ public class TeacherManagementPanel extends JPanel {
             closeButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             closeButton.addActionListener(e -> detailsDialog.dispose());
-            
+
             // Add hover effect
             closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
                     closeButton.setBackground(new Color(90, 98, 104));
                 }
+
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent evt) {
                     closeButton.setBackground(new Color(108, 117, 125));
                 }
             });
-            
+
             buttonPanel.add(closeButton);
-            
+
             detailsDialog.add(headerPanel, BorderLayout.NORTH);
             detailsDialog.add(contentPanel, BorderLayout.CENTER);
             detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
             detailsDialog.setVisible(true);
         }
     }
-    
+
     private void handleAssignClass() {
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn giáo viên để phân lớp!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
+
         if (selectedRow >= 0 && selectedRow < allTeachers.size()) {
             Teacher teacher = allTeachers.get(selectedRow);
-            
+
             JDialog dialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Phân lớp cho giáo viên", true);
             dialog.setLayout(new BorderLayout());
             dialog.setSize(400, 300);
             dialog.setLocationRelativeTo(null);
             dialog.getContentPane().setBackground(new Color(248, 249, 250));
-            
+
             // Header panel
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             headerPanel.setBackground(new Color(248, 249, 250));
@@ -1070,39 +1077,39 @@ public class TeacherManagementPanel extends JPanel {
             headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
             headerLabel.setForeground(new Color(52, 58, 64));
             headerPanel.add(headerLabel);
-            
+
             // Form panel
             JPanel formPanel = new JPanel(new GridBagLayout());
             formPanel.setBackground(new Color(248, 249, 250));
             formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-            
+
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.insets = new Insets(10, 10, 10, 10);
             gbc.anchor = GridBagConstraints.WEST;
-            
+
             // Load available classrooms
             List<Classroom> classrooms = new ArrayList<>();
             try {
                 ClassroomDAO classroomDAO = new ClassroomDAO();
                 classrooms = classroomDAO.getAllClassrooms();
-        } catch (Exception e) {
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(dialog, "Lỗi khi tải danh sách lớp học: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
+
             String[] classNames = new String[classrooms.size() + 1];
             classNames[0] = "Chưa phân lớp";
             for (int i = 0; i < classrooms.size(); i++) {
                 classNames[i + 1] = classrooms.get(i).getClassName();
             }
-            
+
             JComboBox<String> classComboBox = new JComboBox<>(classNames);
             classComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
             classComboBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
             ));
-            
+
             // Set current classroom if any
             if (teacher.getClassroomId() != 0) {
                 for (Classroom classroom : classrooms) {
@@ -1112,21 +1119,21 @@ public class TeacherManagementPanel extends JPanel {
                     }
                 }
             }
-            
+
             gbc.gridx = 0;
             gbc.gridy = 0;
             JLabel classLabel = new JLabel("Lớp học:");
             classLabel.setFont(new Font("Arial", Font.BOLD, 14));
             classLabel.setForeground(new Color(60, 60, 60));
             formPanel.add(classLabel, gbc);
-            
+
             gbc.gridx = 1;
             formPanel.add(classComboBox, gbc);
-            
+
             // Button panel
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
             buttonPanel.setBackground(new Color(248, 249, 250));
-            
+
             JButton assignButton = new JButton("Phân lớp");
             assignButton.setFont(new Font("Arial", Font.BOLD, 13));
             assignButton.setBackground(new Color(46, 204, 113));
@@ -1134,7 +1141,7 @@ public class TeacherManagementPanel extends JPanel {
             assignButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
             assignButton.setFocusPainted(false);
             assignButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            
+
             JButton cancelButton = new JButton("Hủy");
             cancelButton.setFont(new Font("Arial", Font.BOLD, 13));
             cancelButton.setBackground(new Color(149, 165, 166));
@@ -1142,17 +1149,17 @@ public class TeacherManagementPanel extends JPanel {
             cancelButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
             cancelButton.setFocusPainted(false);
             cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            
+
             buttonPanel.add(assignButton);
             buttonPanel.add(cancelButton);
-            
+
             dialog.add(headerPanel, BorderLayout.NORTH);
             dialog.add(formPanel, BorderLayout.CENTER);
             dialog.add(buttonPanel, BorderLayout.SOUTH);
-            
+
             // Event handlers
             cancelButton.addActionListener(e -> dialog.dispose());
-            
+
             final List<Classroom> finalClassrooms = classrooms;
             assignButton.addActionListener(e -> {
                 try {
@@ -1160,7 +1167,7 @@ public class TeacherManagementPanel extends JPanel {
                     if (selectedClassName != null) {
                         int newClassroomId = 0;
                         Classroom selectedClassroom = null;
-                        
+
                         if (!selectedClassName.equals("Chưa phân lớp")) {
                             for (Classroom classroom : finalClassrooms) {
                                 if (classroom.getClassName().equals(selectedClassName)) {
@@ -1169,14 +1176,14 @@ public class TeacherManagementPanel extends JPanel {
                                     break;
                                 }
                             }
-                            
+
                             // Check if the classroom already has a homeroom teacher
                             if (selectedClassroom != null) {
                                 try {
                                     ClassroomDAO classroomDAO = new ClassroomDAO();
                                     // Get fresh data from database to ensure accuracy
                                     Classroom freshClassroom = classroomDAO.getClassroomById(selectedClassroom.getClassId());
-                                    
+
                                     if (freshClassroom != null && freshClassroom.getTeacherId() != 0) {
                                         // Get the current homeroom teacher's name
                                         String currentTeacherName = "Giáo viên ID " + freshClassroom.getTeacherId();
@@ -1189,17 +1196,17 @@ public class TeacherManagementPanel extends JPanel {
                                         } catch (Exception ex) {
                                             // Use default name if can't get teacher info
                                         }
-                                        
+
                                         String errorMessage = String.format(
-                                            "❌ Không thể phân lớp!\n\n" +
-                                            "Lớp %s đã có giáo viên chủ nhiệm: %s.\n\n" +
-                                            "Một lớp chỉ có thể có một giáo viên chủ nhiệm duy nhất.\n\n" +
-                                            "Vui lòng chọn lớp khác hoặc gỡ bỏ giáo viên hiện tại khỏi lớp %s trước.",
-                                            freshClassroom.getClassName(),
-                                            currentTeacherName,
-                                            freshClassroom.getClassName()
+                                                "❌ Không thể phân lớp!\n\n" +
+                                                        "Lớp %s đã có giáo viên chủ nhiệm: %s.\n\n" +
+                                                        "Một lớp chỉ có thể có một giáo viên chủ nhiệm duy nhất.\n\n" +
+                                                        "Vui lòng chọn lớp khác hoặc gỡ bỏ giáo viên hiện tại khỏi lớp %s trước.",
+                                                freshClassroom.getClassName(),
+                                                currentTeacherName,
+                                                freshClassroom.getClassName()
                                         );
-                                        
+
                                         JOptionPane.showMessageDialog(dialog, errorMessage, "Lỗi - Lớp đã có giáo viên chủ nhiệm", JOptionPane.ERROR_MESSAGE);
                                         return;
                                     }
@@ -1209,11 +1216,11 @@ public class TeacherManagementPanel extends JPanel {
                                 }
                             }
                         }
-                        
+
                         // Update teacher's classroom
                         teacher.setClassroomId(newClassroomId);
                         teacherController.updateTeacher(teacher);
-                        
+
                         // Also update classroom's gvcn_id to maintain consistency
                         if (selectedClassroom != null) {
                             selectedClassroom.setTeacherId(teacher.getUser().getUserId());
@@ -1221,7 +1228,7 @@ public class TeacherManagementPanel extends JPanel {
                             classroomDAO.updateClassroom(selectedClassroom);
                             System.out.println("DEBUG: Updated classroom " + selectedClassroom.getClassId() + " with teacher ID " + teacher.getUser().getUserId());
                         }
-                        
+
                         JOptionPane.showMessageDialog(dialog, "Phân lớp thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         dialog.dispose();
                         loadTeacherData(); // Refresh the table
@@ -1231,31 +1238,31 @@ public class TeacherManagementPanel extends JPanel {
                     ex.printStackTrace();
                 }
             });
-            
+
             dialog.setVisible(true);
         }
     }
-    
+
     // Custom cell renderer for clickable columns
     private class ClickableCellRenderer extends DefaultTableCellRenderer {
         @Override
         public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            
+
             String cellValue = value != null ? value.toString() : "";
-            
+
             // Only apply clickable styling if the teacher has a homeroom class
             if (!cellValue.equals("Không chủ nhiệm") && !cellValue.isEmpty()) {
                 // Set blue color, bold, and italic for clickable appearance
                 setForeground(new Color(0, 100, 200)); // Blue color
                 setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 13)); // Bold and italic
-                
+
                 // Add underline to make it more obvious it's clickable
                 setText("<html><u>" + cellValue + "</u></html>");
-                
+
                 // Set cursor to hand cursor when hovering
                 setCursor(new Cursor(Cursor.HAND_CURSOR));
-                
+
                 // Add subtle background highlight for better visibility
                 if (!isSelected) {
                     setBackground(new Color(240, 248, 255)); // Light blue background
@@ -1266,12 +1273,12 @@ public class TeacherManagementPanel extends JPanel {
                 setFont(new Font("Arial", Font.PLAIN, 13));
                 setText(cellValue);
                 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                
+
                 if (!isSelected) {
                     setBackground(Color.WHITE);
                 }
             }
-            
+
             return this;
         }
     }
