@@ -450,12 +450,12 @@ public class TeacherManagementPanel extends JPanel {
 
                 User newTeacher = new User(username, password, fullName, phoneNumber, email, gender, Role.TEACHER);
                 teacherController.createTeacher(newTeacher);
-                JOptionPane.showMessageDialog(addNewTeacherDialog, "Thêm giáo viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialog.showInfoDialog(addNewTeacherDialog, "Thêm giáo viên thành công!", "Thành công");
                 addNewTeacherDialog.dispose();
                 loadTeacherData();
 
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(addNewTeacherDialog, "Lỗi khi thêm giáo viên: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                CustomDialog.showWarningDialog(addNewTeacherDialog, "Lỗi khi thêm giáo viên: " + ex.getMessage(), "Lỗi");
                 System.err.println("Error adding teacher: " + ex.getMessage());
                 ex.printStackTrace();
             }
@@ -691,11 +691,11 @@ public class TeacherManagementPanel extends JPanel {
                 teacher.setUser(updatedUser);
                 teacherController.updateTeacher(teacher);
 
-                JOptionPane.showMessageDialog(editDialog, "Cập nhật thông tin giáo viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialog.showInfoDialog(editDialog, "Cập nhật thông tin giáo viên thành công!", "Thành công");
                 editDialog.dispose();
                 loadTeacherData();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(editDialog, "Lỗi khi cập nhật thông tin: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                CustomDialog.showWarningDialog(editDialog, "Lỗi khi cập nhật thông tin: " + ex.getMessage(), "Lỗi");
             }
         });
 

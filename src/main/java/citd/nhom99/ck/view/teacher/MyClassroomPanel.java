@@ -243,10 +243,9 @@ public class MyClassroomPanel extends JPanel {
                     displayStudents(allStudents);
                 } else {
                     titleLabel.setText("Lớp học của tôi - Chưa được phân lớp");
-                    JOptionPane.showMessageDialog(this,
+                    CustomDialog.showInfoDialog(this,
                             "Bạn chưa được phân công lớp học nào!",
-                            "Thông báo",
-                            JOptionPane.INFORMATION_MESSAGE);
+                            "Thông báo");
                 }
             } else {
                 // Fallback: load tất cả students nếu không có teacher info

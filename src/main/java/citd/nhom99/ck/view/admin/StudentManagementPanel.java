@@ -374,7 +374,7 @@ public class StudentManagementPanel extends JPanel {
                 String fullName = fullNameField.getText().trim();
                 String email = emailField.getText().trim();
                 String phoneNumber = phoneNumberField.getText().trim();
-                Gender gender = (Gender) genderField.getSelectedItem();
+                Gender gender = getGenderFromVietnamese((String) genderField.getSelectedItem());
 
                 // Kiểm tra các trường bắt buộc
                 if (username.isEmpty() || password.isEmpty() || fullName.isEmpty() || email.isEmpty() || phoneNumber.isEmpty()) {
@@ -1123,5 +1123,25 @@ public class StudentManagementPanel extends JPanel {
             default:
                 return "Chưa xếp loại";
         }
+    }
+    
+    // Helper method to create gender combobox with Vietnamese options
+    private JComboBox<String> createGenderComboBox() {
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"Nam", "Nữ"});
+        comboBox.setFont(new Font("Arial", Font.PLAIN, 14));
+        comboBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        return comboBox;
+    }
+    
+    // Helper method to convert Vietnamese gender string to Gender enum
+    private Gender getGenderFromVietnamese(String vietnameseGender) {
+        return switch (vietnameseGender) {
+            case "Nam" -> Gender.MALE;
+            case "Nữ" -> Gender.FEMALE;
+            default -> Gender.MALE; // Default to MALE if invalid
+        };
     }
 }
