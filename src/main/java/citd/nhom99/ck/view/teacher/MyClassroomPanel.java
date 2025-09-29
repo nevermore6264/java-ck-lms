@@ -30,6 +30,7 @@ import citd.nhom99.ck.config.DBConfig;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
 import citd.nhom99.ck.model.Teacher;
+import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.StudentDAO;
 import citd.nhom99.ck.utils.CustomDialog;
 
@@ -383,19 +384,15 @@ public class MyClassroomPanel extends JPanel {
     }
     
     private Classroom getClassroomByTeacherId(int teacherId) {
-        String sql = "SELECT c.* FROM classrooms c WHERE c.gvcn_id = ?";
-        try (Connection conn = DBConfig.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, teacherId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                int classId = rs.getInt("class_id");
-                String className = rs.getString("class_name");
-                int gvcnId = rs.getInt("gvcn_id");
-                return new Classroom(classId, className, gvcnId);
+        try {
+            ClassroomDAO classroomDAO = new ClassroomDAO();
+            List<Classroom> allClassrooms = classroomDAO.getAllClassrooms();
+            for (Classroom classroom : allClassrooms) {
+                if (classroom.getTeacherId() == teacherId) {
+                    return classroom;
+                }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.println("Error getting classroom by teacher ID: " + e.getMessage());
         }
         return null;
