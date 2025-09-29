@@ -277,45 +277,11 @@ public class TeacherManagementPanel extends JPanel {
         gbc.insets = new Insets(15, 15, 15, 15);
         gbc.anchor = GridBagConstraints.WEST;
 
-        JTextField usernameField = new JTextField();
-        usernameField.setFont(new Font("Arial", Font.PLAIN, 16));
-        usernameField.setPreferredSize(new Dimension(300, 50));
-        usernameField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JPasswordField passwordField = new JPasswordField();
-        passwordField.setFont(new Font("Arial", Font.PLAIN, 16));
-        passwordField.setPreferredSize(new Dimension(300, 50));
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JTextField fullNameField = new JTextField();
-        fullNameField.setFont(new Font("Arial", Font.PLAIN, 16));
-        fullNameField.setPreferredSize(new Dimension(300, 50));
-        fullNameField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JTextField emailField = new JTextField();
-        emailField.setFont(new Font("Arial", Font.PLAIN, 16));
-        emailField.setPreferredSize(new Dimension(300, 50));
-        emailField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JTextField phoneNumberField = new JTextField();
-        phoneNumberField.setFont(new Font("Arial", Font.PLAIN, 16));
-        phoneNumberField.setPreferredSize(new Dimension(300, 50));
-        phoneNumberField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
+        JTextField usernameField = createStyledTextField(30);
+        JPasswordField passwordField = createStyledPasswordField(30);
+        JTextField fullNameField = createStyledTextField(30);
+        JTextField emailField = createStyledTextField(30);
+        JTextField phoneNumberField = createStyledTextField(30);
 
         JComboBox<String> genderField = createGenderComboBox();
 
@@ -323,7 +289,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Username:"), gbc);
+        formPanel.add(createStyledLabel("Username:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -333,7 +299,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Password:"), gbc);
+        formPanel.add(createStyledLabel("Password:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -343,7 +309,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Họ và tên:"), gbc);
+        formPanel.add(createStyledLabel("Họ và tên:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -353,7 +319,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 3;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Email:"), gbc);
+        formPanel.add(createStyledLabel("Email:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -363,7 +329,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 4;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Số điện thoại:"), gbc);
+        formPanel.add(createStyledLabel("Số điện thoại:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -373,7 +339,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 5;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Giới tính:"), gbc);
+        formPanel.add(createStyledLabel("Giới tính:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -495,50 +461,16 @@ public class TeacherManagementPanel extends JPanel {
         // Get current user data from database
         User currentUser = teacher.getUser();
 
-        JTextField usernameField = new JTextField();
-        usernameField.setFont(new Font("Arial", Font.PLAIN, 16));
-        usernameField.setPreferredSize(new Dimension(300, 50));
+        JTextField usernameField = createStyledTextField(30);
         usernameField.setText(currentUser.getUsername());
-        usernameField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JPasswordField passwordField = new JPasswordField();
-        passwordField.setFont(new Font("Arial", Font.PLAIN, 16));
-        passwordField.setPreferredSize(new Dimension(300, 50));
+        JPasswordField passwordField = createStyledPasswordField(30);
         passwordField.setText(currentUser.getPassword());
-        passwordField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JTextField fullNameField = new JTextField();
-        fullNameField.setFont(new Font("Arial", Font.PLAIN, 16));
-        fullNameField.setPreferredSize(new Dimension(300, 50));
+        JTextField fullNameField = createStyledTextField(30);
         fullNameField.setText(currentUser.getFullName());
-        fullNameField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JTextField emailField = new JTextField();
-        emailField.setFont(new Font("Arial", Font.PLAIN, 16));
-        emailField.setPreferredSize(new Dimension(300, 50));
+        JTextField emailField = createStyledTextField(30);
         emailField.setText(currentUser.getEmail());
-        emailField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JTextField phoneNumberField = new JTextField();
-        phoneNumberField.setFont(new Font("Arial", Font.PLAIN, 16));
-        phoneNumberField.setPreferredSize(new Dimension(300, 50));
+        JTextField phoneNumberField = createStyledTextField(30);
         phoneNumberField.setText(currentUser.getPhoneNumber());
-        phoneNumberField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
 
         JComboBox<String> genderField = createGenderComboBox();
         genderField.setSelectedItem(getGenderInVietnamese(currentUser.getGender()));
@@ -548,7 +480,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Username:"), gbc);
+        formPanel.add(createStyledLabel("Username:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -558,7 +490,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 1;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Password:"), gbc);
+        formPanel.add(createStyledLabel("Password:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -568,7 +500,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Họ và tên:"), gbc);
+        formPanel.add(createStyledLabel("Họ và tên:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -578,7 +510,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 3;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Email:"), gbc);
+        formPanel.add(createStyledLabel("Email:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -588,7 +520,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 4;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Số điện thoại:"), gbc);
+        formPanel.add(createStyledLabel("Số điện thoại:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -598,7 +530,7 @@ public class TeacherManagementPanel extends JPanel {
         gbc.gridy = 5;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0.0;
-        formPanel.add(new JLabel("Giới tính:"), gbc);
+        formPanel.add(createStyledLabel("Giới tính:"), gbc);
         gbc.gridx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
@@ -712,13 +644,13 @@ public class TeacherManagementPanel extends JPanel {
     private void handleDeleteTeacher() {
         int selectedRow = teacherTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn giáo viên cần xóa.", "Thông báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Vui lòng chọn giáo viên cần xóa!", "Cảnh báo");
             return;
         }
 
         Teacher teacher = allTeachers.get(selectedRow);
         if (teacher.getUser() == null) {
-            JOptionPane.showMessageDialog(this, "Không thể xóa giáo viên này.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Không thể xóa giáo viên này!", "Lỗi");
             return;
         }
 
@@ -730,31 +662,24 @@ public class TeacherManagementPanel extends JPanel {
                         "• Email: %s\n" +
                         "• Số điện thoại: %s\n" +
                         "• Giới tính: %s\n" +
-                        "• Lớp chủ nhiệm: %s\n\n" +
-                        "⚠️ Cảnh báo: Hành động này không thể hoàn tác!",
+                        "• Lớp chủ nhiệm: %s",
                 teacher.getTeacherCode(),
                 teacher.getUser().getFullName(),
                 teacher.getUser().getEmail(),
                 teacher.getUser().getPhoneNumber(),
-                teacher.getUser().getGender() != null ? teacher.getUser().getGender() : "Không xác định",
+                teacher.getUser().getGender() != null ? getGenderInVietnamese(teacher.getUser().getGender()) : "Không xác định",
                 teacher.getClassroomId() != 0 ? "Lớp " + teacher.getClassroomId() : "Không chủ nhiệm"
         );
 
-        int confirm = JOptionPane.showConfirmDialog(
-                this,
-                message,
-                "Xác nhận xóa giáo viên",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE
-        );
-
-        if (confirm == JOptionPane.YES_OPTION) {
+        boolean confirm = CustomDialog.showConfirmDialog(this, message, "Xác nhận xóa giáo viên");
+        
+        if (confirm) {
             try {
                 teacherController.deleteTeacher(teacher.getUser().getUserId());
                 loadTeacherData();
-                JOptionPane.showMessageDialog(this, "Đã xóa giáo viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                CustomDialog.showInfoDialog(this, "Đã xóa giáo viên thành công!", "Thành công");
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi xóa giáo viên: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                CustomDialog.showWarningDialog(this, "Lỗi khi xóa giáo viên: " + e.getMessage(), "Lỗi");
             }
         }
     }
@@ -864,11 +789,10 @@ public class TeacherManagementPanel extends JPanel {
     
     private JComboBox<String> createGenderComboBox() {
         JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Nam", "Nữ"});
-        genderComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
-        genderComboBox.setPreferredSize(new Dimension(300, 50));
+        genderComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
         genderComboBox.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
         return genderComboBox;
     }
@@ -879,6 +803,35 @@ public class TeacherManagementPanel extends JPanel {
             case "Nữ" -> Gender.FEMALE;
             default -> Gender.MALE;
         };
+    }
+    
+    // Helper methods for styled components
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.BOLD, 14));
+        label.setForeground(new Color(60, 60, 60));
+        label.setPreferredSize(new Dimension(120, 25));
+        return label;
+    }
+
+    private JTextField createStyledTextField(int columns) {
+        JTextField textField = new JTextField(columns);
+        textField.setFont(new Font("Arial", Font.PLAIN, 14));
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        return textField;
+    }
+
+    private JPasswordField createStyledPasswordField(int columns) {
+        JPasswordField passwordField = new JPasswordField(columns);
+        passwordField.setFont(new Font("Arial", Font.PLAIN, 14));
+        passwordField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        return passwordField;
     }
 
     private void handleClassClick(int row) {
