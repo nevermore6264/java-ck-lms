@@ -9,8 +9,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.RenderingHints;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -18,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+import citd.nhom99.ck.config.DBConfig;
 import citd.nhom99.ck.model.User;
 import citd.nhom99.ck.model.constant.Role;
 
@@ -88,8 +95,19 @@ public class HomePanel extends JPanel {
         
         // Quick access buttons for admin
         if (currentUser != null && currentUser.getRole() == Role.ADMIN) {
-            JPanel quickAccessPanel = createQuickAccessPanel();
-            panel.add(quickAccessPanel, BorderLayout.CENTER);
+            // Create main content area with charts and quick access
+            JPanel mainContentPanel = new JPanel(new BorderLayout());
+            mainContentPanel.setBackground(new Color(248, 249, 250));
+            
+            // Add charts panel
+            JPanel chartsPanel = createChartsPanel();
+            mainContentPanel.add(chartsPanel, BorderLayout.CENTER);
+            
+            // Add smaller quick access buttons at the bottom
+            JPanel quickAccessPanel = createCompactQuickAccessPanel();
+            mainContentPanel.add(quickAccessPanel, BorderLayout.SOUTH);
+            
+            panel.add(mainContentPanel, BorderLayout.CENTER);
         } else {
             // Default feature cards for other roles
             JPanel featurePanel = new JPanel(new GridLayout(2, 2, 20, 20));
@@ -218,65 +236,162 @@ public class HomePanel extends JPanel {
         return panel;
     }
     
-    private JPanel createQuickAccessPanel() {
-        JPanel panel = new JPanel(new GridLayout(2, 2, 20, 20));
+    private JPanel createChartsPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 2, 20, 20));
         panel.setBackground(new Color(248, 249, 250));
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
-        // Quick access buttons for admin
-        panel.add(createQuickAccessButton("Quản lý Học sinh", 
-            "Thêm, sửa, xóa và phân lớp học sinh", 
+        // Add chart panels
+        panel.add(createChartPanel("Thống kê Học sinh", new Color(52, 144, 220)));
+        panel.add(createChartPanel("Thống kê Giáo viên", new Color(40, 167, 69)));
+        
+        return panel;
+    }
+    
+    private JPanel createChartPanel(String title, Color color) {
+        JPanel chartPanel = new JPanel(new BorderLayout());
+        chartPanel.setBackground(Color.WHITE);
+        chartPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        
+        // Title
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        titleLabel.setForeground(color);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        chartPanel.add(titleLabel, BorderLayout.NORTH);
+        
+        // Get real data based on chart type
+        String[] labels;
+        int[] values;
+        
+        if (title.contains("Học sinh")) {
+            Map<String, Integer> chartData = getStudentStatistics();
+            labels = new String[]{"Lớp 10", "Lớp 11", "Lớp 12", "Tổng HS"};
+            values = new int[]{
+                chartData.getOrDefault("Lớp 10", 0),
+                chartData.getOrDefault("Lớp 11", 0), 
+                chartData.getOrDefault("Lớp 12", 0),
+                chartData.getOrDefault("Tổng", 0)
+            };
+        } else {
+            Map<String, Integer> chartData = getTeacherStatistics();
+            labels = new String[]{"Lớp 10", "Lớp 11", "Lớp 12", "Tổng GV"};
+            values = new int[]{
+                chartData.getOrDefault("Lớp 10", 0),
+                chartData.getOrDefault("Lớp 11", 0),
+                chartData.getOrDefault("Lớp 12", 0), 
+                chartData.getOrDefault("Tổng", 0)
+            };
+        }
+        
+        // Chart area with real data
+        JPanel chartArea = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                int height = getHeight();
+                
+                // Draw bar chart
+                int barWidth = 35;
+                int spacing = 15;
+                int startX = 20;
+                int baseY = height - 40;
+                
+                // Find max value for scaling
+                int maxValue = 0;
+                for (int value : values) {
+                    if (value > maxValue) maxValue = value;
+                }
+                if (maxValue == 0) maxValue = 1; // Avoid division by zero
+                
+                for (int i = 0; i < values.length; i++) {
+                    int barHeight = (int) ((double) values[i] / maxValue * (height - 100));
+                    int x = startX + i * (barWidth + spacing);
+                    int y = baseY - barHeight;
+                    
+                    // Draw bar
+                    g2d.setColor(color);
+                    g2d.fillRect(x, y, barWidth, barHeight);
+                    
+                    // Draw value
+                    g2d.setColor(Color.BLACK);
+                    g2d.setFont(new Font("Arial", Font.BOLD, 10));
+                    String valueText = String.valueOf(values[i]);
+                    int textWidth = g2d.getFontMetrics().stringWidth(valueText);
+                    g2d.drawString(valueText, x + (barWidth - textWidth) / 2, y - 5);
+                    
+                    // Draw label
+                    g2d.setFont(new Font("Arial", Font.PLAIN, 9));
+                    g2d.drawString(labels[i], x + (barWidth - g2d.getFontMetrics().stringWidth(labels[i])) / 2, baseY + 15);
+                }
+                
+                g2d.dispose();
+            }
+        };
+        chartArea.setPreferredSize(new Dimension(300, 200));
+        chartArea.setBackground(Color.WHITE);
+        chartPanel.add(chartArea, BorderLayout.CENTER);
+        
+        return chartPanel;
+    }
+    
+    private JPanel createCompactQuickAccessPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 4, 15, 15));
+        panel.setBackground(new Color(248, 249, 250));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        
+        // Compact quick access buttons for admin
+        panel.add(createCompactQuickAccessButton("Quản lý Học sinh", 
             new Color(52, 144, 220), "Quản lý Học sinh"));
             
-        panel.add(createQuickAccessButton("Quản lý Giáo viên", 
-            "Quản lý thông tin và phân công giáo viên", 
+        panel.add(createCompactQuickAccessButton("Quản lý Giáo viên", 
             new Color(40, 167, 69), "Quản lý Giáo viên"));
             
-        panel.add(createQuickAccessButton("Quản lý Lớp học", 
-            "Tạo và quản lý các lớp học", 
+        panel.add(createCompactQuickAccessButton("Quản lý Lớp học", 
             new Color(255, 193, 7), "Quản lý Lớp học"));
             
-        panel.add(createQuickAccessButton("Tài khoản", 
-            "Xem và chỉnh sửa thông tin tài khoản", 
+        panel.add(createCompactQuickAccessButton("Tài khoản", 
             new Color(220, 53, 69), "Tài khoản"));
         
         return panel;
     }
     
-    private JPanel createQuickAccessButton(String title, String description, Color color, String panelName) {
+    private JPanel createCompactQuickAccessButton(String title, Color color, String panelName) {
         JPanel card = new JPanel(new BorderLayout());
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
         
-        // Create icon panel
-        JPanel iconPanel = createIconPanel(color);
+        // Create smaller icon panel
+        JPanel iconPanel = createCompactIconPanel(color);
         
         // Title with icon
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setBackground(Color.WHITE);
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
         
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
         titleLabel.setForeground(color);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
-        titlePanel.add(iconPanel, BorderLayout.WEST);
+        titlePanel.add(iconPanel, BorderLayout.NORTH);
         titlePanel.add(titleLabel, BorderLayout.CENTER);
-        
-        // Description
-        JLabel descLabel = new JLabel("<html><div style='width: 200px; text-align: justify;'>" + description + "</div></html>");
-        descLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        descLabel.setForeground(new Color(100, 100, 100));
-        descLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         
         // Action button
         JButton actionButton = new JButton("Truy cập");
-        actionButton.setFont(new Font("Arial", Font.BOLD, 12));
+        actionButton.setFont(new Font("Arial", Font.BOLD, 11));
         actionButton.setBackground(color);
         actionButton.setForeground(Color.WHITE);
-        actionButton.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+        actionButton.setBorder(BorderFactory.createEmptyBorder(6, 15, 6, 15));
         actionButton.setFocusPainted(false);
         actionButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
@@ -299,15 +414,117 @@ public class HomePanel extends JPanel {
         // Add click action
         actionButton.addActionListener(e -> {
             if (onNavigateToPanel != null) {
-                // Navigate to the specified panel
                 onNavigateToPanel.accept(panelName);
             }
         });
         
-        card.add(titlePanel, BorderLayout.NORTH);
-        card.add(descLabel, BorderLayout.CENTER);
+        card.add(titlePanel, BorderLayout.CENTER);
         card.add(actionButton, BorderLayout.SOUTH);
         
         return card;
     }
+    
+    private JPanel createCompactIconPanel(Color color) {
+        JPanel iconPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Draw a smaller circle icon
+                g2d.setColor(color);
+                g2d.fillOval(8, 8, 16, 16);
+                
+                // Draw a smaller inner circle
+                g2d.setColor(Color.WHITE);
+                g2d.fillOval(12, 12, 8, 8);
+                
+                g2d.dispose();
+            }
+        };
+        iconPanel.setPreferredSize(new Dimension(32, 32));
+        iconPanel.setBackground(Color.WHITE);
+        return iconPanel;
+    }
+    
+    private Map<String, Integer> getStudentStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
+        String sql = "SELECT " +
+                    "CASE " +
+                    "  WHEN c.class_name LIKE '10%' THEN 'Lớp 10' " +
+                    "  WHEN c.class_name LIKE '11%' THEN 'Lớp 11' " +
+                    "  WHEN c.class_name LIKE '12%' THEN 'Lớp 12' " +
+                    "  ELSE 'Khác' " +
+                    "END as grade_level, " +
+                    "COUNT(*) as student_count " +
+                    "FROM students s " +
+                    "LEFT JOIN classrooms c ON s.class_id = c.class_id " +
+                    "GROUP BY grade_level";
+        
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            int totalStudents = 0;
+            while (rs.next()) {
+                String gradeLevel = rs.getString("grade_level");
+                int count = rs.getInt("student_count");
+                stats.put(gradeLevel, count);
+                totalStudents += count;
+            }
+            stats.put("Tổng", totalStudents);
+            
+        } catch (SQLException e) {
+            System.out.println("Error getting student statistics: " + e.getMessage());
+            // Return default values if error
+            stats.put("Lớp 10", 0);
+            stats.put("Lớp 11", 0);
+            stats.put("Lớp 12", 0);
+            stats.put("Tổng", 0);
+        }
+        
+        return stats;
+    }
+    
+    private Map<String, Integer> getTeacherStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
+        String sql = "SELECT " +
+                    "CASE " +
+                    "  WHEN c.class_name LIKE '10%' THEN 'Lớp 10' " +
+                    "  WHEN c.class_name LIKE '11%' THEN 'Lớp 11' " +
+                    "  WHEN c.class_name LIKE '12%' THEN 'Lớp 12' " +
+                    "  ELSE 'Khác' " +
+                    "END as grade_level, " +
+                    "COUNT(DISTINCT t.user_id) as teacher_count " +
+                    "FROM teachers t " +
+                    "LEFT JOIN classrooms c ON t.classroom_id = c.class_id " +
+                    "WHERE t.classroom_id > 0 " +
+                    "GROUP BY grade_level";
+        
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            int totalTeachers = 0;
+            while (rs.next()) {
+                String gradeLevel = rs.getString("grade_level");
+                int count = rs.getInt("teacher_count");
+                stats.put(gradeLevel, count);
+                totalTeachers += count;
+            }
+            stats.put("Tổng", totalTeachers);
+            
+        } catch (SQLException e) {
+            System.out.println("Error getting teacher statistics: " + e.getMessage());
+            // Return default values if error
+            stats.put("Lớp 10", 0);
+            stats.put("Lớp 11", 0);
+            stats.put("Lớp 12", 0);
+            stats.put("Tổng", 0);
+        }
+        
+        return stats;
+    }
+    
 }

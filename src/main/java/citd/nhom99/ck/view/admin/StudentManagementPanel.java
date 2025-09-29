@@ -29,9 +29,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 
 import citd.nhom99.ck.controller.StudentController;
+import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
 import citd.nhom99.ck.model.User;
 import citd.nhom99.ck.model.constant.Gender;
@@ -200,7 +200,7 @@ public class StudentManagementPanel extends JPanel {
     }
 
     // Custom cell renderer to make text look like links
-    private class LinkCellRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
+    private class LinkCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -640,7 +640,7 @@ public class StudentManagementPanel extends JPanel {
                         student.getUser().getFullName(),
                         student.getUser().getEmail(),
                         student.getUser().getPhoneNumber(),
-                        student.getUser().getGender(),
+                        getGenderInVietnamese(student.getUser().getGender()),
                         student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa có lớp",
                     student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm"
                 };
@@ -668,6 +668,18 @@ public class StudentManagementPanel extends JPanel {
                 .collect(java.util.stream.Collectors.toList());
 
         displayStudents(filteredStudents);
+    }
+
+    // Helper method to convert gender to Vietnamese
+    private String getGenderInVietnamese(Gender gender) {
+        if (gender == null) {
+            return "Không xác định";
+        }
+        return switch (gender) {
+            case MALE -> "Nam";
+            case FEMALE -> "Nữ";
+            default -> "Không xác định";
+        };
     }
 
     // Helper methods for styled components
@@ -713,25 +725,45 @@ public class StudentManagementPanel extends JPanel {
         if (row >= 0 && row < allStudents.size()) {
             Student student = allStudents.get(row);
             if (student.getClassroom() != null) {
-                String message = String.format(
-                    "Thông tin lớp học:\n\n" +
-                    "• Tên lớp: %s\n" +
-                    "• ID lớp: %d\n" +
-                    "• Sĩ số: %d học sinh\n" +
-                    "• GVCN: %s",
-                    student.getClassroom().getClassName(),
-                    student.getClassroom().getClassId(),
-                    student.getClassroom().getStudents().size(),
-                    student.getClassroom().getTeacher() != null ? 
-                        student.getClassroom().getTeacher().getUser().getFullName() : "Chưa có"
-                );
-                
-                JOptionPane.showMessageDialog(
-                    this, 
-                    message, 
-                    "Thông tin lớp học", 
-                    JOptionPane.INFORMATION_MESSAGE
-                );
+                try {
+                    // Load đầy đủ thông tin lớp học từ database
+                    ClassroomDAO classroomDAO = new ClassroomDAO();
+                    Classroom classroom = classroomDAO.getClassroomById(student.getClassroom().getClassId());
+                    
+                    if (classroom != null) {
+                        // Lấy thông tin giáo viên chủ nhiệm
+                        String teacherName = "Chưa có GVCN";
+                        if (classroom.getTeacher() != null && classroom.getTeacher().getUser() != null) {
+                            teacherName = classroom.getTeacher().getUser().getFullName();
+                        }
+                        
+                        // Lấy sĩ số lớp
+                        int studentCount = classroom.getStudents() != null ? classroom.getStudents().size() : 0;
+                        
+                        String message = String.format(
+                            "Thông tin lớp học:\n\n" +
+                            "• Tên lớp: %s\n" +
+                            "• ID lớp: %d\n" +
+                            "• Sĩ số: %d học sinh\n" +
+                            "• GVCN: %s",
+                            classroom.getClassName(),
+                            classroom.getClassId(),
+                            studentCount,
+                            teacherName
+                        );
+                        
+                        JOptionPane.showMessageDialog(
+                            this, 
+                            message, 
+                            "Thông tin lớp học", 
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Không thể tải thông tin lớp học!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(this, "Lỗi khi tải thông tin lớp học: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "Học sinh chưa được phân lớp!", "Thông báo", JOptionPane.WARNING_MESSAGE);
             }
@@ -799,7 +831,7 @@ public class StudentManagementPanel extends JPanel {
                 student.getUser().getFullName(),
                 student.getUser().getEmail(),
                 student.getUser().getPhoneNumber(),
-                student.getUser().getGender(),
+                getGenderInVietnamese(student.getUser().getGender()),
                 student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa phân lớp",
                 student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm",
                 student.getStudentGrade() != null && student.getStudentGrade().getClassified() != null ? 

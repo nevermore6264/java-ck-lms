@@ -375,10 +375,56 @@ public class TeacherManagementPanel extends JPanel {
         formPanel.add(genderField, gbc);
 
         // Panel chứa form button
-        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
+        buttonPanel.setBackground(new Color(248, 249, 250));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
         JButton saveButton = new JButton("Lưu");
+        saveButton.setFont(new Font("Arial", Font.BOLD, 16));
+        saveButton.setPreferredSize(new Dimension(120, 45));
+        saveButton.setBackground(new Color(40, 167, 69));
+        saveButton.setForeground(Color.WHITE);
+        saveButton.setFocusPainted(false);
+        saveButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        saveButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JButton cancelButton = new JButton("Hủy");
+        cancelButton.setFont(new Font("Arial", Font.BOLD, 16));
+        cancelButton.setPreferredSize(new Dimension(120, 45));
+        cancelButton.setBackground(new Color(108, 117, 125));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+        
+        // Add hover effects
+        saveButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                saveButton.setBackground(new Color(34, 139, 34));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                saveButton.setBackground(new Color(40, 167, 69));
+            }
+        });
+        
+        cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelButton.setBackground(new Color(90, 98, 104));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelButton.setBackground(new Color(108, 117, 125));
+            }
+        });
+        
+        // Add cancel action
+        cancelButton.addActionListener(e -> addNewTeacherDialog.dispose());
 
         // Thêm Dialog vào panel
         addNewTeacherDialog.add(formPanel, BorderLayout.CENTER);
@@ -539,6 +585,7 @@ public class TeacherManagementPanel extends JPanel {
         saveButton.setForeground(Color.WHITE);
         saveButton.setFocusPainted(false);
         saveButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        saveButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         JButton cancelButton = new JButton("Hủy");
         cancelButton.setFont(new Font("Arial", Font.BOLD, 16));
@@ -547,6 +594,30 @@ public class TeacherManagementPanel extends JPanel {
         cancelButton.setForeground(Color.WHITE);
         cancelButton.setFocusPainted(false);
         cancelButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Add hover effects
+        saveButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                saveButton.setBackground(new Color(34, 139, 34));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                saveButton.setBackground(new Color(40, 167, 69));
+            }
+        });
+        
+        cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelButton.setBackground(new Color(90, 98, 104));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelButton.setBackground(new Color(108, 117, 125));
+            }
+        });
 
         saveButton.addActionListener(e -> {
             // Validation
@@ -661,6 +732,12 @@ public class TeacherManagementPanel extends JPanel {
         try {
             allTeachers = teacherController.getAllTeachers();
             displayTeachers(allTeachers);
+            
+            // Check for data inconsistencies (only in debug mode)
+            if (System.getProperty("debug") != null) {
+                ClassroomDAO classroomDAO = new ClassroomDAO();
+                classroomDAO.checkDataConsistency();
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this,
                     "Lỗi khi tải dữ liệu giáo viên: " + e.getMessage(),
@@ -693,7 +770,7 @@ public class TeacherManagementPanel extends JPanel {
                             teacher.getUser().getFullName(),
                             teacher.getUser().getEmail(),
                             teacher.getUser().getPhoneNumber(),
-                            teacher.getUser().getGender(),
+                            getGenderInVietnamese(teacher.getUser().getGender()),
                         classroomName,
                             teacher.getSubjectId()
                     };
@@ -725,6 +802,18 @@ public class TeacherManagementPanel extends JPanel {
         displayTeachers(filteredTeachers);
     }
 
+    // Helper method to convert gender to Vietnamese
+    private String getGenderInVietnamese(Gender gender) {
+        if (gender == null) {
+            return "Không xác định";
+        }
+        return switch (gender) {
+            case MALE -> "Nam";
+            case FEMALE -> "Nữ";
+            default -> "Không xác định";
+        };
+    }
+
     private void handleClassClick(int row) {
         if (row >= 0 && row < allTeachers.size()) {
             Teacher teacher = allTeachers.get(row);
@@ -741,10 +830,14 @@ public class TeacherManagementPanel extends JPanel {
                             studentList.append("Danh sách học sinh:\n");
                             for (int i = 0; i < classroom.getStudents().size(); i++) {
                                 Student student = classroom.getStudents().get(i);
-                                studentList.append(String.format("%d. %s (%s)\n", 
-                                    i + 1, 
-                                    student.getUser().getFullName(),
-                                    student.getStudentCode()));
+                                if (student != null && student.getUser() != null) {
+                                    studentList.append(String.format("%d. %s (%s)\n", 
+                                        i + 1, 
+                                        student.getUser().getFullName(),
+                                        student.getStudentCode()));
+                                } else {
+                                    studentList.append(String.format("%d. [Dữ liệu không hợp lệ]\n", i + 1));
+                                }
                             }
                         } else {
                             studentList.append("Lớp chưa có học sinh nào.");
@@ -795,7 +888,7 @@ public class TeacherManagementPanel extends JPanel {
                     "• ID môn: %d",
                     teacher.getUser().getFullName(),
                     teacher.getTeacherCode(),
-                    "Môn " + teacher.getSubjectId(), // Có thể load tên môn từ database
+                    "Môn " + teacher.getSubjectId(),
                     teacher.getSubjectId()
                 );
                 
@@ -824,10 +917,11 @@ public class TeacherManagementPanel extends JPanel {
             // Create custom dialog
             JDialog detailsDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết giáo viên", true);
             detailsDialog.setLayout(new BorderLayout());
-            detailsDialog.setSize(500, 600);
+            detailsDialog.setSize(600, 700);
             detailsDialog.setLocationRelativeTo(null);
             detailsDialog.getContentPane().setBackground(new Color(248, 249, 250));
-            detailsDialog.setResizable(false);
+            detailsDialog.setResizable(true);
+            detailsDialog.setMinimumSize(new Dimension(500, 600));
 
             // Header panel
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -864,14 +958,14 @@ public class TeacherManagementPanel extends JPanel {
             
             // Create info labels
             String[][] infoData = {
-                {"👤 Mã giáo viên:", teacher.getTeacherCode()},
-                {"📝 Họ và tên:", teacher.getUser().getFullName()},
-                {"📧 Email:", teacher.getUser().getEmail()},
-                {"📱 Số điện thoại:", teacher.getUser().getPhoneNumber()},
-                {"⚧ Giới tính:", teacher.getUser().getGender() != null ? teacher.getUser().getGender().toString() : "Không xác định"},
-                {"🏫 Lớp chủ nhiệm:", classroomName},
-                {"📚 Môn dạy:", teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"},
-                {"🆔 ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
+                {"Mã giáo viên:", teacher.getTeacherCode()},
+                {"Họ và tên:", teacher.getUser().getFullName()},
+                {"Email:", teacher.getUser().getEmail()},
+                {"Số điện thoại:", teacher.getUser().getPhoneNumber()},
+                {"Giới tính:", getGenderInVietnamese(teacher.getUser().getGender())},
+                {"Lớp chủ nhiệm:", classroomName},
+                {"Môn dạy:", teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"},
+                {"ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
             };
             
             for (int i = 0; i < infoData.length; i++) {
@@ -883,7 +977,7 @@ public class TeacherManagementPanel extends JPanel {
                 JLabel label = new JLabel(infoData[i][0]);
                 label.setFont(new Font("Arial", Font.BOLD, 16));
                 label.setForeground(new Color(52, 58, 64));
-                label.setPreferredSize(new Dimension(200, 30));
+                label.setPreferredSize(new Dimension(180, 30));
                 contentPanel.add(label, gbc);
                 
                 gbc.gridx = 1;
@@ -914,7 +1008,20 @@ public class TeacherManagementPanel extends JPanel {
             closeButton.setForeground(Color.WHITE);
             closeButton.setFocusPainted(false);
             closeButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             closeButton.addActionListener(e -> detailsDialog.dispose());
+            
+            // Add hover effect
+            closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    closeButton.setBackground(new Color(90, 98, 104));
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    closeButton.setBackground(new Color(108, 117, 125));
+                }
+            });
             
             buttonPanel.add(closeButton);
             

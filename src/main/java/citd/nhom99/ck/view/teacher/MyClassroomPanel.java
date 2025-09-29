@@ -6,6 +6,12 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -20,21 +26,28 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import citd.nhom99.ck.controller.ClassroomController;
+import citd.nhom99.ck.config.DBConfig;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
+import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.dao.StudentDAO;
 
 public class MyClassroomPanel extends JPanel {
     private JTable studentTable;
     private DefaultTableModel tableModel;
-    private final ClassroomController classroomController = new ClassroomController();
     private final StudentDAO studentDAO = new StudentDAO();
     private JTextField searchField;
     private List<Student> allStudents;
     private Classroom currentClassroom;
+    private Teacher currentTeacher;
+    private JLabel titleLabel;
 
     public MyClassroomPanel() {
+        this(null);
+    }
+    
+    public MyClassroomPanel(Teacher teacher) {
+        this.currentTeacher = teacher;
         setLayout(new BorderLayout());
         setBackground(new Color(248, 249, 250));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -64,7 +77,7 @@ public class MyClassroomPanel extends JPanel {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         titlePanel.setBackground(new Color(248, 249, 250));
         
-        JLabel titleLabel = new JLabel("Lớp học của tôi");
+        titleLabel = new JLabel("Lớp học của tôi");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(new Color(52, 58, 64));
         titlePanel.add(titleLabel);
@@ -217,11 +230,29 @@ public class MyClassroomPanel extends JPanel {
         tableModel.setRowCount(0);
 
         try {
-            // TODO: Lấy classroom của teacher hiện tại
-            // Hiện tại sẽ load tất cả students để demo
-            allStudents = studentDAO.getAllStudents();
-            displayStudents(allStudents);
-        } catch (Exception e) {
+            if (currentTeacher != null) {
+                // Lấy lớp học của giáo viên hiện tại
+                currentClassroom = getClassroomByTeacherId(currentTeacher.getUserId());
+                if (currentClassroom != null) {
+                    // Cập nhật title
+                    titleLabel.setText("Lớp học của tôi - " + currentClassroom.getClassName());
+                    
+                    // Lấy danh sách học sinh của lớp đó
+                    allStudents = getStudentsByClassroomId(currentClassroom.getClassId());
+                    displayStudents(allStudents);
+                } else {
+                    titleLabel.setText("Lớp học của tôi - Chưa được phân lớp");
+                    JOptionPane.showMessageDialog(this,
+                            "Bạn chưa được phân công lớp học nào!",
+                            "Thông báo",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            } else {
+                // Fallback: load tất cả students nếu không có teacher info
+                allStudents = studentDAO.getAllStudents();
+                displayStudents(allStudents);
+            }
+        } catch (RuntimeException e) {
             JOptionPane.showMessageDialog(this,
                     "Lỗi khi tải dữ liệu lớp học: " + e.getMessage(),
                     "Lỗi",
@@ -287,15 +318,16 @@ public class MyClassroomPanel extends JPanel {
         String averageGrade = (String) studentTable.getValueAt(selectedRow, 6);
 
         // Tạo thông báo chi tiết
-        String message = String.format(
-            "Thông tin chi tiết học sinh:\n\n" +
-            "• ID: %d\n" +
-            "• Mã SV: %s\n" +
-            "• Họ tên: %s\n" +
-            "• Email: %s\n" +
-            "• SĐT: %s\n" +
-            "• Giới tính: %s\n" +
-            "• Điểm TB: %s",
+        String message = String.format("""
+            Thông tin chi tiết học sinh:
+            
+            • ID: %d
+            • Mã SV: %s
+            • Họ tên: %s
+            • Email: %s
+            • SĐT: %s
+            • Giới tính: %s
+            • Điểm TB: %s""",
             userId, studentCode, fullName, email, phoneNumber, gender, averageGrade
         );
 
@@ -308,6 +340,105 @@ public class MyClassroomPanel extends JPanel {
     }
 
     private void handleExport() {
-        JOptionPane.showMessageDialog(this, "Chức năng xuất danh sách sẽ được phát triển trong tương lai!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        if (allStudents == null || allStudents.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không có dữ liệu để xuất!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        try {
+            // Tạo file CSV
+            String fileName = "Danh_sach_hoc_sinh_" + 
+                (currentClassroom != null ? currentClassroom.getClassName() : "Lop") + 
+                "_" + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd")) + ".csv";
+            
+            try (FileWriter writer = new FileWriter(fileName)) {
+                // Ghi header
+                writer.append("STT,Mã SV,Họ và tên,Email,Số điện thoại,Giới tính,Điểm TB\n");
+                
+                // Ghi dữ liệu
+                int stt = 1;
+                for (Student student : allStudents) {
+                    if (student.getUser() != null) {
+                        writer.append(String.valueOf(stt++)).append(",");
+                        writer.append(student.getStudentCode()).append(",");
+                        writer.append(student.getUser().getFullName()).append(",");
+                        writer.append(student.getUser().getEmail()).append(",");
+                        writer.append(student.getUser().getPhoneNumber()).append(",");
+                        writer.append(student.getUser().getGender().toString()).append(",");
+                        writer.append(student.getStudentGrade() != null ? 
+                            String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm");
+                        writer.append("\n");
+                    }
+                }
+                
+                writer.flush();
+            }
+            
+            JOptionPane.showMessageDialog(this, 
+                "Xuất danh sách thành công!\nFile: " + fileName, 
+                "Thành công", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi khi xuất file: " + e.getMessage(), 
+                "Lỗi", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private Classroom getClassroomByTeacherId(int teacherId) {
+        String sql = "SELECT c.* FROM classrooms c WHERE c.gvcn_id = ?";
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, teacherId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                int classId = rs.getInt("class_id");
+                String className = rs.getString("class_name");
+                int gvcnId = rs.getInt("gvcn_id");
+                return new Classroom(classId, className, gvcnId);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting classroom by teacher ID: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    private List<Student> getStudentsByClassroomId(int classroomId) {
+        String sql = "SELECT s.*, u.full_name, u.email, u.phone_number, u.gender " +
+                    "FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.class_id = ? " +
+                    "ORDER BY s.student_code";
+        
+        List<Student> students = new java.util.ArrayList<>();
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, classroomId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                Student student = new Student();
+                student.setUserId(rs.getInt("user_id"));
+                student.setStudentCode(rs.getString("student_code"));
+                student.setClassroomId(rs.getInt("class_id"));
+                
+                // Tạo User object
+                citd.nhom99.ck.model.User user = new citd.nhom99.ck.model.User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setGender(citd.nhom99.ck.model.constant.Gender.valueOf(rs.getString("gender")));
+                
+                student.setUser(user);
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting students by classroom ID: " + e.getMessage());
+        }
+        return students;
     }
 }

@@ -58,7 +58,14 @@ public class MainContentPanel extends JPanel {
         contentPanel.add(new TeacherManagementPanel(), "Quản lý Giáo viên");
         
         // Teacher panels
-        contentPanel.add(new MyClassroomPanel(), "Lớp học của tôi");
+        if (user.getRole() == Role.TEACHER) {
+            Teacher teacher = getTeacherByUserId(user.getUserId());
+            if (teacher != null) {
+                contentPanel.add(new MyClassroomPanel(teacher), "Lớp học của tôi");
+            }
+        } else {
+            contentPanel.add(new MyClassroomPanel(), "Lớp học của tôi");
+        }
         
         // Role-specific panels
         if (user.getRole() == Role.STUDENT) {

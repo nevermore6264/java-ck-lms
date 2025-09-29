@@ -12,7 +12,6 @@ public class InitData {
         try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement()) {
             
-            // Check if database already has data
             boolean hasUsers = false;
             try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as count FROM users")) {
                 if (rs.next() && rs.getInt("count") > 0) {
@@ -45,7 +44,6 @@ public class InitData {
             
             System.out.println("\n=== DEBUG: Checking created data ===");
             
-            // Check Users
             System.out.println("\n--- USERS ---");
             try (ResultSet rs = stmt.executeQuery("SELECT user_id, username, password, full_name, email, phone_number, gender, role FROM users ORDER BY user_id")) {
                 while (rs.next()) {
@@ -59,7 +57,6 @@ public class InitData {
                 }
             }
             
-            // Check Subjects
             System.out.println("\n--- SUBJECTS ---");
             try (ResultSet rs = stmt.executeQuery("SELECT subject_id, subject_name FROM subjects ORDER BY subject_id")) {
                 while (rs.next()) {
@@ -68,7 +65,6 @@ public class InitData {
                 }
             }
             
-            // Check Classrooms
             System.out.println("\n--- CLASSROOMS ---");
             try (ResultSet rs = stmt.executeQuery("SELECT class_id, class_name, gvcn_id FROM classrooms ORDER BY class_id")) {
                 while (rs.next()) {
@@ -78,7 +74,6 @@ public class InitData {
                 }
             }
             
-            // Check Teachers
             System.out.println("\n--- TEACHERS ---");
             try (ResultSet rs = stmt.executeQuery("SELECT t.user_id, t.teacher_code, t.subject_id, t.classroom_id, u.full_name FROM teachers t LEFT JOIN users u ON t.user_id = u.user_id ORDER BY t.user_id")) {
                 while (rs.next()) {
@@ -90,7 +85,6 @@ public class InitData {
                 }
             }
             
-            // Check Students
             System.out.println("\n--- STUDENTS ---");
             try (ResultSet rs = stmt.executeQuery("SELECT s.user_id, s.student_code, s.grade_id, s.class_id, u.full_name, c.class_name FROM students s LEFT JOIN users u ON s.user_id = u.user_id LEFT JOIN classrooms c ON s.class_id = c.class_id ORDER BY s.user_id")) {
                 while (rs.next()) {
@@ -103,7 +97,6 @@ public class InitData {
                 }
             }
             
-            // Check Schedules
             System.out.println("\n--- SCHEDULES ---");
             try (ResultSet rs = stmt.executeQuery("SELECT s.id, s.classroom_id, c.class_name, s.subject_id, sub.subject_name, s.teacher_id, u.full_name as teacher_name, s.day_of_week, s.period, s.semester, s.academic_year FROM schedules s LEFT JOIN classrooms c ON s.classroom_id = c.class_id LEFT JOIN subjects sub ON s.subject_id = sub.subject_id LEFT JOIN users u ON s.teacher_id = u.user_id ORDER BY s.classroom_id, s.day_of_week, s.period")) {
                 while (rs.next()) {
@@ -118,7 +111,6 @@ public class InitData {
                 }
             }
             
-            // Check Student Grades
             System.out.println("\n--- STUDENT GRADES ---");
             try (ResultSet rs = stmt.executeQuery("SELECT sg.id, sg.student_id, s.student_code, u.full_name as student_name, sg.subject_id, sub.subject_name, sg.regular_grade, sg.midterm_grade, sg.final_grade, sg.average_grade, sg.classified, sg.semester, sg.academic_year FROM student_grades sg LEFT JOIN students s ON sg.student_id = s.user_id LEFT JOIN users u ON s.user_id = u.user_id LEFT JOIN subjects sub ON sg.subject_id = sub.subject_id ORDER BY sg.student_id, sg.subject_id")) {
                 while (rs.next()) {

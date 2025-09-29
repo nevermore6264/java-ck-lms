@@ -128,7 +128,9 @@ public class ClassroomDAO {
     }
 
     private List<Student> getStudentsForClassroom(String classId) {
-        String sql = "SELECT * FROM students WHERE class_id = ?";
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.class_id = ? AND u.role = 'STUDENT'";
         List<Student> students = new ArrayList<>();
         try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -136,11 +138,51 @@ public class ClassroomDAO {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 // Use method that doesn't load classroom to avoid circular dependency
-                students.add(studentDAO.getStudentByIdWithoutClassroom(rs.getInt("user_id")));
+                Student student = studentDAO.getStudentByIdWithoutClassroom(rs.getInt("user_id"));
+                if (student != null) {
+                    students.add(student);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error loading students for classroom " + classId + ": " + e.getMessage());
         }
         return students;
+    }
+    
+    // Method to check for data inconsistencies
+    public void checkDataConsistency() {
+        String sql = "SELECT s.user_id, s.student_code, u.role " +
+                    "FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE u.role IS NULL OR u.role != 'STUDENT'";
+        
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            System.out.println("=== Data Consistency Check ===");
+            boolean hasInconsistencies = false;
+            
+            while (rs.next()) {
+                hasInconsistencies = true;
+                int userId = rs.getInt("user_id");
+                String studentCode = rs.getString("student_code");
+                String role = rs.getString("role");
+                
+                System.out.println("Inconsistent data found:");
+                System.out.println("  - Student ID: " + userId);
+                System.out.println("  - Student Code: " + studentCode);
+                System.out.println("  - User Role: " + (role == null ? "NULL (user not found)" : role));
+                System.out.println("  - Issue: Student record exists but user is not a STUDENT");
+                System.out.println();
+            }
+            
+            if (!hasInconsistencies) {
+                System.out.println("No data inconsistencies found. All student records have valid user records with STUDENT role.");
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error checking data consistency: " + e.getMessage());
+        }
     }
 }

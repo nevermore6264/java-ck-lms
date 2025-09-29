@@ -15,7 +15,7 @@ import citd.nhom99.ck.utils.Helper;
 
 public class StudentDAO {
     private final UserDAO userDAO = new UserDAO();
-    private StudentGradeDAO studentGradeDAO = new StudentGradeDAO();
+    private final StudentGradeDAO studentGradeDAO = new StudentGradeDAO();
 
     public StudentDAO() {
     }
@@ -39,7 +39,9 @@ public class StudentDAO {
     }
 
     public Student getStudentByCode(String studentCode) {
-        String sql = "SELECT * FROM students WHERE student_code = ?";
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.student_code = ? AND u.role = 'STUDENT'";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentCode);
             ResultSet rs = pstmt.executeQuery();
@@ -53,7 +55,9 @@ public class StudentDAO {
     }
 
     public Student getStudentById(int userId) {
-        String sql = "SELECT * FROM students WHERE user_id = ?";
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.user_id = ? AND u.role = 'STUDENT'";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
@@ -83,9 +87,11 @@ public class StudentDAO {
     }
 
     public List<Student> getAllStudents() {
-        String sql = "SELECT s.*, c.class_name " +
+        String sql = "SELECT s.*, c.class_name, u.role " +
                     "FROM students s " +
-                    "LEFT JOIN classrooms c ON s.class_id = c.class_id";
+                    "LEFT JOIN classrooms c ON s.class_id = c.class_id " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE u.role = 'STUDENT'";
         List<Student> students = new ArrayList<>();
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
@@ -129,7 +135,6 @@ public class StudentDAO {
             
         } catch (SQLException e) {
             System.out.println("DAO: Error updating student: " + e.getMessage());
-            e.printStackTrace();
         }
     }
     
@@ -150,7 +155,6 @@ public class StudentDAO {
             
         } catch (SQLException e) {
             System.out.println("DAO: Error updating student classroom: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -175,7 +179,9 @@ public class StudentDAO {
     
     // Method to get student without loading classroom (used by ClassroomDAO to avoid circular dependency)
     public Student getStudentByIdWithoutClassroom(int userId) {
-        String sql = "SELECT * FROM students WHERE user_id = ?";
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.user_id = ? AND u.role = 'STUDENT'";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();

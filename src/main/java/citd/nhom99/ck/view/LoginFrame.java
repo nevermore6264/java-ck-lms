@@ -201,7 +201,7 @@ public class LoginFrame extends JFrame {
         buttonPanel.add(adminButton);
         
         // Teacher Button
-        JButton teacherButton = createQuickLoginButton("Giáo viên", new Color(40, 167, 69), "teacher1", "teacher1");
+        JButton teacherButton = createQuickLoginButton("Giáo viên", new Color(40, 167, 69), "teacher3", "teacher3");
         buttonPanel.add(teacherButton);
         
         // Student Button
