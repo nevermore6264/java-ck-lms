@@ -24,6 +24,7 @@ import citd.nhom99.ck.model.StudentGrade;
 import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.dao.ScheduleDAO;
 import citd.nhom99.ck.model.dao.StudentGradeDAO;
+import citd.nhom99.ck.utils.SubjectTranslator;
 
 public class TeacherPanel extends JPanel {
     private final AppController controller;
@@ -193,7 +194,7 @@ public class TeacherPanel extends JPanel {
                     getDayOfWeekVietnamese(schedule.getDayOfWeek()),
                     schedule.getPeriod(),
                     schedule.getClassroom() != null ? schedule.getClassroom().getClassName() : "N/A",
-                    schedule.getSubject() != null ? schedule.getSubject().getSubjectName() : "N/A",
+                    schedule.getSubject() != null ? SubjectTranslator.convertToVietnamese(schedule.getSubject().getSubjectName()) : "N/A",
                     "Phòng " + schedule.getClassroomId() // Có thể thay bằng thông tin phòng thực tế
                 };
                 model.addRow(row);
