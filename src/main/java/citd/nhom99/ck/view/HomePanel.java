@@ -237,15 +237,84 @@ public class HomePanel extends JPanel {
     }
     
     private JPanel createChartsPanel() {
-        JPanel panel = new JPanel(new GridLayout(1, 2, 20, 20));
+        JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(248, 249, 250));
         panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
-        // Add chart panels
-        panel.add(createChartPanel("Thống kê Học sinh", new Color(52, 144, 220)));
-        panel.add(createChartPanel("Thống kê Giáo viên", new Color(40, 167, 69)));
+        // Top row - Overview cards
+        JPanel overviewPanel = createOverviewPanel();
+        panel.add(overviewPanel, BorderLayout.NORTH);
+        
+        // Bottom row - Charts
+        JPanel chartsRow = new JPanel(new GridLayout(1, 2, 20, 20));
+        chartsRow.setBackground(new Color(248, 249, 250));
+        chartsRow.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        
+        chartsRow.add(createChartPanel("Thống kê Học sinh", new Color(52, 144, 220)));
+        chartsRow.add(createChartPanel("Thống kê Giáo viên", new Color(40, 167, 69)));
+        
+        panel.add(chartsRow, BorderLayout.CENTER);
         
         return panel;
+    }
+    
+    private JPanel createOverviewPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 4, 15, 15));
+        panel.setBackground(new Color(248, 249, 250));
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        
+        // Get system statistics
+        Map<String, Integer> systemStats = getSystemStatistics();
+        
+        // Create overview cards
+        panel.add(createOverviewCard("Tổng Học sinh", systemStats.get("totalStudents"), "👥", new Color(52, 144, 220)));
+        panel.add(createOverviewCard("Tổng Giáo viên", systemStats.get("totalTeachers"), "👨‍🏫", new Color(40, 167, 69)));
+        panel.add(createOverviewCard("Tổng Lớp học", systemStats.get("totalClassrooms"), "🏫", new Color(255, 193, 7)));
+        panel.add(createOverviewCard("Lớp có GVCN", systemStats.get("classroomsWithTeachers"), "✅", new Color(108, 117, 125)));
+        
+        return panel;
+    }
+    
+    private JPanel createOverviewCard(String title, int value, String icon, Color color) {
+        JPanel card = new JPanel(new BorderLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        
+        // Icon and title panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setForeground(new Color(100, 100, 100));
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        headerPanel.add(iconLabel, BorderLayout.NORTH);
+        headerPanel.add(titleLabel, BorderLayout.SOUTH);
+        
+        // Value panel
+        JPanel valuePanel = new JPanel(new BorderLayout());
+        valuePanel.setBackground(Color.WHITE);
+        
+        JLabel valueLabel = new JLabel(String.valueOf(value));
+        valueLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        valueLabel.setForeground(color);
+        valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        valuePanel.add(valueLabel, BorderLayout.CENTER);
+        
+        card.add(headerPanel, BorderLayout.NORTH);
+        card.add(valuePanel, BorderLayout.CENTER);
+        
+        return card;
     }
     
     private JPanel createChartPanel(String title, Color color) {
@@ -295,13 +364,22 @@ public class HomePanel extends JPanel {
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 
+                int width = getWidth();
                 int height = getHeight();
                 
+                // Draw background gradient
+                java.awt.GradientPaint gradient = new java.awt.GradientPaint(
+                    0, 0, new Color(248, 249, 250),
+                    0, height, new Color(240, 242, 245)
+                );
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, width, height);
+                
                 // Draw bar chart
-                int barWidth = 35;
-                int spacing = 15;
-                int startX = 20;
-                int baseY = height - 40;
+                int barWidth = 40;
+                int spacing = 20;
+                int startX = 30;
+                int baseY = height - 50;
                 
                 // Find max value for scaling
                 int maxValue = 0;
@@ -311,24 +389,42 @@ public class HomePanel extends JPanel {
                 if (maxValue == 0) maxValue = 1; // Avoid division by zero
                 
                 for (int i = 0; i < values.length; i++) {
-                    int barHeight = (int) ((double) values[i] / maxValue * (height - 100));
+                    int barHeight = (int) ((double) values[i] / maxValue * (height - 120));
                     int x = startX + i * (barWidth + spacing);
                     int y = baseY - barHeight;
                     
-                    // Draw bar
-                    g2d.setColor(color);
-                    g2d.fillRect(x, y, barWidth, barHeight);
+                    // Create gradient for bars
+                    Color lightColor = new Color(
+                        Math.min(255, color.getRed() + 30),
+                        Math.min(255, color.getGreen() + 30),
+                        Math.min(255, color.getBlue() + 30)
+                    );
+                    java.awt.GradientPaint barGradient = new java.awt.GradientPaint(
+                        x, y, lightColor,
+                        x, y + barHeight, color
+                    );
+                    g2d.setPaint(barGradient);
                     
-                    // Draw value
-                    g2d.setColor(Color.BLACK);
-                    g2d.setFont(new Font("Arial", Font.BOLD, 10));
+                    // Draw bar with rounded corners
+                    g2d.fillRoundRect(x, y, barWidth, barHeight, 8, 8);
+                    
+                    // Draw bar border
+                    g2d.setColor(new Color(color.getRed() - 20, color.getGreen() - 20, color.getBlue() - 20));
+                    g2d.setStroke(new java.awt.BasicStroke(1));
+                    g2d.drawRoundRect(x, y, barWidth, barHeight, 8, 8);
+                    
+                    // Draw value with better styling
+                    g2d.setColor(new Color(60, 60, 60));
+                    g2d.setFont(new Font("Arial", Font.BOLD, 12));
                     String valueText = String.valueOf(values[i]);
                     int textWidth = g2d.getFontMetrics().stringWidth(valueText);
-                    g2d.drawString(valueText, x + (barWidth - textWidth) / 2, y - 5);
+                    g2d.drawString(valueText, x + (barWidth - textWidth) / 2, y - 8);
                     
-                    // Draw label
-                    g2d.setFont(new Font("Arial", Font.PLAIN, 9));
-                    g2d.drawString(labels[i], x + (barWidth - g2d.getFontMetrics().stringWidth(labels[i])) / 2, baseY + 15);
+                    // Draw label with better styling
+                    g2d.setColor(new Color(100, 100, 100));
+                    g2d.setFont(new Font("Arial", Font.PLAIN, 10));
+                    int labelWidth = g2d.getFontMetrics().stringWidth(labels[i]);
+                    g2d.drawString(labels[i], x + (barWidth - labelWidth) / 2, baseY + 18);
                 }
                 
                 g2d.dispose();
@@ -522,6 +618,58 @@ public class HomePanel extends JPanel {
             stats.put("Lớp 11", 0);
             stats.put("Lớp 12", 0);
             stats.put("Tổng", 0);
+        }
+        
+        return stats;
+    }
+    
+    private Map<String, Integer> getSystemStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
+        
+        try (Connection conn = DBConfig.getConnection()) {
+            // Total students
+            String studentSql = "SELECT COUNT(*) as total FROM students";
+            try (PreparedStatement pstmt = conn.prepareStatement(studentSql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("totalStudents", rs.getInt("total"));
+                }
+            }
+            
+            // Total teachers
+            String teacherSql = "SELECT COUNT(*) as total FROM teachers";
+            try (PreparedStatement pstmt = conn.prepareStatement(teacherSql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("totalTeachers", rs.getInt("total"));
+                }
+            }
+            
+            // Total classrooms
+            String classroomSql = "SELECT COUNT(*) as total FROM classrooms";
+            try (PreparedStatement pstmt = conn.prepareStatement(classroomSql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("totalClassrooms", rs.getInt("total"));
+                }
+            }
+            
+            // Classrooms with homeroom teachers
+            String classroomWithTeacherSql = "SELECT COUNT(*) as total FROM classrooms WHERE teacher_id > 0";
+            try (PreparedStatement pstmt = conn.prepareStatement(classroomWithTeacherSql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("classroomsWithTeachers", rs.getInt("total"));
+                }
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error getting system statistics: " + e.getMessage());
+            // Return default values if error
+            stats.put("totalStudents", 0);
+            stats.put("totalTeachers", 0);
+            stats.put("totalClassrooms", 0);
+            stats.put("classroomsWithTeachers", 0);
         }
         
         return stats;

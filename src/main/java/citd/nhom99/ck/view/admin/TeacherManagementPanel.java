@@ -38,6 +38,7 @@ import citd.nhom99.ck.model.User;
 import citd.nhom99.ck.model.constant.Gender;
 import citd.nhom99.ck.model.constant.Role;
 import citd.nhom99.ck.model.dao.ClassroomDAO;
+import citd.nhom99.ck.model.dao.TeacherDAO;
 
 public class TeacherManagementPanel extends JPanel {
     private final TeacherController teacherController = new TeacherController();
@@ -1148,11 +1149,53 @@ public class TeacherManagementPanel extends JPanel {
                     String selectedClassName = (String) classComboBox.getSelectedItem();
                     if (selectedClassName != null) {
                         int newClassroomId = 0;
+                        Classroom selectedClassroom = null;
+                        
                         if (!selectedClassName.equals("Chưa phân lớp")) {
                             for (Classroom classroom : finalClassrooms) {
                                 if (classroom.getClassName().equals(selectedClassName)) {
                                     newClassroomId = classroom.getClassId();
+                                    selectedClassroom = classroom;
                                     break;
+                                }
+                            }
+                            
+                            // Check if the classroom already has a homeroom teacher
+                            if (selectedClassroom != null) {
+                                try {
+                                    ClassroomDAO classroomDAO = new ClassroomDAO();
+                                    // Get fresh data from database to ensure accuracy
+                                    Classroom freshClassroom = classroomDAO.getClassroomById(selectedClassroom.getClassId());
+                                    
+                                    if (freshClassroom != null && freshClassroom.getTeacherId() != 0) {
+                                        // Get the current homeroom teacher's name
+                                        String currentTeacherName = "Giáo viên ID " + freshClassroom.getTeacherId();
+                                        try {
+                                            TeacherDAO teacherDAO = new TeacherDAO();
+                                            Teacher currentTeacher = teacherDAO.getTeacherByUserId(freshClassroom.getTeacherId());
+                                            if (currentTeacher != null && currentTeacher.getUser() != null) {
+                                                currentTeacherName = currentTeacher.getUser().getFullName() + " (" + currentTeacher.getTeacherCode() + ")";
+                                            }
+                                        } catch (Exception ex) {
+                                            // Use default name if can't get teacher info
+                                        }
+                                        
+                                        String errorMessage = String.format(
+                                            "❌ Không thể phân lớp!\n\n" +
+                                            "Lớp %s đã có giáo viên chủ nhiệm: %s.\n\n" +
+                                            "Một lớp chỉ có thể có một giáo viên chủ nhiệm duy nhất.\n\n" +
+                                            "Vui lòng chọn lớp khác hoặc gỡ bỏ giáo viên hiện tại khỏi lớp %s trước.",
+                                            freshClassroom.getClassName(),
+                                            currentTeacherName,
+                                            freshClassroom.getClassName()
+                                        );
+                                        
+                                        JOptionPane.showMessageDialog(dialog, errorMessage, "Lỗi - Lớp đã có giáo viên chủ nhiệm", JOptionPane.ERROR_MESSAGE);
+                                        return;
+                                    }
+                                } catch (Exception ex) {
+                                    JOptionPane.showMessageDialog(dialog, "Lỗi khi kiểm tra thông tin lớp: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                                    return;
                                 }
                             }
                         }

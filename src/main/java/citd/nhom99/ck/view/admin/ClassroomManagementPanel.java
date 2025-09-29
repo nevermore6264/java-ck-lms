@@ -178,11 +178,22 @@ public class ClassroomManagementPanel extends JPanel {
         }
 
         List<Classroom> filteredClassrooms = allClassrooms.stream()
-                .filter(classroom -> 
-                    classroom.getClassName().toLowerCase().contains(searchText) ||
-                    String.valueOf(classroom.getClassId()).contains(searchText) ||
-                    String.valueOf(classroom.getTeacherId()).contains(searchText)
-                )
+                .filter(classroom -> {
+                    // Search by class name
+                    boolean matchesClassName = classroom.getClassName().toLowerCase().contains(searchText);
+                    
+                    // Search by class ID
+                    boolean matchesClassId = String.valueOf(classroom.getClassId()).contains(searchText);
+                    
+                    // Search by teacher name
+                    boolean matchesTeacherName = false;
+                    if (classroom.getTeacher() != null && classroom.getTeacher().getUser() != null) {
+                        String teacherName = classroom.getTeacher().getUser().getFullName().toLowerCase();
+                        matchesTeacherName = teacherName.contains(searchText);
+                    }
+                    
+                    return matchesClassName || matchesClassId || matchesTeacherName;
+                })
                 .collect(java.util.stream.Collectors.toList());
 
         displayClassrooms(filteredClassrooms);
@@ -664,12 +675,51 @@ public class ClassroomManagementPanel extends JPanel {
                     String selectedTeacher = (String) teacherComboBox.getSelectedItem();
                     if (selectedTeacher != null) {
                         int newTeacherId = 0;
+                        Teacher selectedTeacherObj = null;
+                        
                         if (!selectedTeacher.equals("Chưa gắn GVCN")) {
                             for (Teacher teacher : finalTeachers) {
                                 String teacherDisplay = teacher.getUser().getFullName() + " (" + teacher.getTeacherCode() + ")";
                                 if (teacherDisplay.equals(selectedTeacher)) {
                                     newTeacherId = teacher.getUser().getUserId();
+                                    selectedTeacherObj = teacher;
                                     break;
+                                }
+                            }
+                            
+                            // Check if teacher is already a homeroom teacher of another class
+                            if (selectedTeacherObj != null) {
+                                try {
+                                    ClassroomDAO classroomDAO = new ClassroomDAO();
+                                    // Check if this teacher is already managing any other classroom
+                                    List<Classroom> allClassrooms = classroomDAO.getAllClassrooms();
+                                    Classroom existingClassroom = null;
+                                    
+                                    for (Classroom existingClass : allClassrooms) {
+                                        if (existingClass.getTeacherId() == newTeacherId && existingClass.getClassId() != classroom.getClassId()) {
+                                            existingClassroom = existingClass;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (existingClassroom != null) {
+                                        String errorMessage = String.format(
+                                            "❌ Không thể gắn GVCN!\n\n" +
+                                            "Giáo viên %s (%s) đã là chủ nhiệm của lớp %s.\n\n" +
+                                            "Một giáo viên chỉ có thể làm chủ nhiệm của một lớp duy nhất.\n\n" +
+                                            "Vui lòng chọn giáo viên khác hoặc gỡ bỏ giáo viên này khỏi lớp %s trước.",
+                                            selectedTeacherObj.getUser().getFullName(),
+                                            selectedTeacherObj.getTeacherCode(),
+                                            existingClassroom.getClassName(),
+                                            existingClassroom.getClassName()
+                                        );
+                                        
+                                        JOptionPane.showMessageDialog(dialog, errorMessage, "Lỗi - Giáo viên đã có lớp chủ nhiệm", JOptionPane.ERROR_MESSAGE);
+                                        return;
+                                    }
+                                } catch (Exception ex) {
+                                    JOptionPane.showMessageDialog(dialog, "Lỗi khi kiểm tra thông tin giáo viên: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                                    return;
                                 }
                             }
                         }
