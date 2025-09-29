@@ -309,7 +309,7 @@ public class StudentManagementPanel extends JPanel {
         JTextField fullNameField = createStyledTextField(30);
         JTextField emailField = createStyledTextField(30);
         JTextField phoneNumberField = createStyledTextField(30);
-        JComboBox<Gender> genderField = createStyledComboBox(Gender.values());
+        JComboBox<String> genderField = createGenderComboBox();
 
         // Thêm label cho input field
         gbc.gridx = 0;
@@ -740,24 +740,97 @@ public class StudentManagementPanel extends JPanel {
                         // Lấy sĩ số lớp
                         int studentCount = classroom.getStudents() != null ? classroom.getStudents().size() : 0;
                         
-                        String message = String.format(
-                            "Thông tin lớp học:\n\n" +
-                            "• Tên lớp: %s\n" +
-                            "• ID lớp: %d\n" +
-                            "• Sĩ số: %d học sinh\n" +
-                            "• GVCN: %s",
-                            classroom.getClassName(),
-                            classroom.getClassId(),
-                            studentCount,
-                            teacherName
-                        );
+                        // Create custom dialog for class information
+                        JDialog classInfoDialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Thông tin lớp học", true);
+                        classInfoDialog.setSize(500, 400);
+                        classInfoDialog.setLocationRelativeTo(this);
+                        classInfoDialog.setResizable(false);
                         
-                        JOptionPane.showMessageDialog(
-                            this, 
-                            message, 
-                            "Thông tin lớp học", 
-                            JOptionPane.INFORMATION_MESSAGE
-                        );
+                        // Main panel
+                        JPanel mainPanel = new JPanel(new BorderLayout());
+                        mainPanel.setBackground(Color.WHITE);
+                        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                        
+                        // Header panel
+                        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                        headerPanel.setBackground(Color.WHITE);
+                        
+                        JLabel titleLabel = new JLabel("Thông tin lớp học");
+                        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+                        titleLabel.setForeground(new Color(52, 144, 220));
+                        headerPanel.add(titleLabel);
+                        
+                        // Content panel
+                        JPanel contentPanel = new JPanel(new java.awt.GridBagLayout());
+                        contentPanel.setBackground(Color.WHITE);
+                        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+                        
+                        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+                        gbc.insets = new java.awt.Insets(8, 10, 8, 10);
+                        gbc.anchor = java.awt.GridBagConstraints.WEST;
+                        
+                        // Class information
+                        String[][] infoData = {
+                            {"Tên lớp:", classroom.getClassName()},
+                            {"ID lớp:", String.valueOf(classroom.getClassId())},
+                            {"Sĩ số:", String.valueOf(studentCount) + " học sinh"},
+                            {"GVCN:", teacherName}
+                        };
+                        
+                        for (int i = 0; i < infoData.length; i++) {
+                            gbc.gridx = 0;
+                            gbc.gridy = i;
+                            gbc.fill = java.awt.GridBagConstraints.NONE;
+                            gbc.weightx = 0.0;
+                            JLabel labelLabel = new JLabel(infoData[i][0]);
+                            labelLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                            labelLabel.setForeground(new Color(52, 58, 64));
+                            contentPanel.add(labelLabel, gbc);
+                            
+                            gbc.gridx = 1;
+                            gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+                            gbc.weightx = 1.0;
+                            JLabel valueLabel = new JLabel(infoData[i][1]);
+                            valueLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+                            valueLabel.setForeground(Color.BLACK);
+                            contentPanel.add(valueLabel, gbc);
+                        }
+                        
+                        // Button panel
+                        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+                        buttonPanel.setBackground(Color.WHITE);
+                        
+                        JButton closeButton = new JButton("Hủy");
+                        closeButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                        closeButton.setBackground(new Color(108, 117, 125));
+                        closeButton.setForeground(Color.WHITE);
+                        closeButton.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+                        closeButton.setFocusPainted(false);
+                        closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                        closeButton.setPreferredSize(new Dimension(100, 40));
+                        
+                        // Add hover effect
+                        closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                            @Override
+                            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                                closeButton.setBackground(new Color(90, 98, 104));
+                            }
+                            @Override
+                            public void mouseExited(java.awt.event.MouseEvent evt) {
+                                closeButton.setBackground(new Color(108, 117, 125));
+                            }
+                        });
+                        
+                        closeButton.addActionListener(e -> classInfoDialog.dispose());
+                        
+                        buttonPanel.add(closeButton);
+                        
+                        mainPanel.add(headerPanel, BorderLayout.NORTH);
+                        mainPanel.add(contentPanel, BorderLayout.CENTER);
+                        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+                        
+                        classInfoDialog.add(mainPanel);
+                        classInfoDialog.setVisible(true);
                     } else {
                         JOptionPane.showMessageDialog(this, "Không thể tải thông tin lớp học!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                     }
@@ -815,30 +888,103 @@ public class StudentManagementPanel extends JPanel {
         if (selectedRow >= 0 && selectedRow < allStudents.size()) {
             Student student = allStudents.get(selectedRow);
             
-            String message = String.format(
-                "Thông tin chi tiết học sinh:\n\n" +
-                "• ID: %d\n" +
-                "• Mã SV: %s\n" +
-                "• Họ tên: %s\n" +
-                "• Email: %s\n" +
-                "• SĐT: %s\n" +
-                "• Giới tính: %s\n" +
-                "• Lớp: %s\n" +
-                "• Điểm TB: %s\n" +
-                "• Xếp loại: %s",
-                student.getUser().getUserId(),
-                student.getStudentCode(),
-                student.getUser().getFullName(),
-                student.getUser().getEmail(),
-                student.getUser().getPhoneNumber(),
-                getGenderInVietnamese(student.getUser().getGender()),
-                student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa phân lớp",
-                student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm",
-                student.getStudentGrade() != null && student.getStudentGrade().getClassified() != null ? 
-                    student.getStudentGrade().getClassified().toString() : "Chưa xếp loại"
-            );
-
-            CustomDialog.showInfoDialog(this, message, "Chi tiết học sinh");
+            // Create custom dialog for student details
+            JDialog detailDialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết học sinh", true);
+            detailDialog.setSize(500, 400);
+            detailDialog.setLocationRelativeTo(this);
+            detailDialog.setResizable(false);
+            
+            // Main panel
+            JPanel mainPanel = new JPanel(new BorderLayout());
+            mainPanel.setBackground(Color.WHITE);
+            mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+            
+            // Header panel
+            JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            headerPanel.setBackground(Color.WHITE);
+            
+            JLabel titleLabel = new JLabel("Thông tin chi tiết học sinh");
+            titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            titleLabel.setForeground(new Color(52, 144, 220));
+            headerPanel.add(titleLabel);
+            
+            // Content panel
+            JPanel contentPanel = new JPanel(new java.awt.GridBagLayout());
+            contentPanel.setBackground(Color.WHITE);
+            contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+            
+            java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+            gbc.insets = new java.awt.Insets(8, 10, 8, 10);
+            gbc.anchor = java.awt.GridBagConstraints.WEST;
+            
+            // Student information
+            String[][] infoData = {
+                {"ID:", String.valueOf(student.getUser().getUserId())},
+                {"Mã SV:", student.getStudentCode()},
+                {"Họ tên:", student.getUser().getFullName()},
+                {"Email:", student.getUser().getEmail()},
+                {"Số điện thoại:", student.getUser().getPhoneNumber()},
+                {"Giới tính:", getGenderInVietnamese(student.getUser().getGender())},
+                {"Lớp:", student.getClassroom() != null ? student.getClassroom().getClassName() : "Chưa phân lớp"},
+                {"Điểm TB:", student.getStudentGrade() != null ? String.format("%.2f", student.getStudentGrade().getAverageGrade()) : "Chưa có điểm"},
+                {"Xếp loại:", student.getStudentGrade() != null && student.getStudentGrade().getClassified() != null ? 
+                    getClassifiedInVietnamese(student.getStudentGrade().getClassified()) : "Chưa xếp loại"}
+            };
+            
+            for (int i = 0; i < infoData.length; i++) {
+                gbc.gridx = 0;
+                gbc.gridy = i;
+                gbc.fill = java.awt.GridBagConstraints.NONE;
+                gbc.weightx = 0.0;
+                JLabel labelLabel = new JLabel(infoData[i][0]);
+                labelLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                labelLabel.setForeground(new Color(52, 58, 64));
+                contentPanel.add(labelLabel, gbc);
+                
+                gbc.gridx = 1;
+                gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+                gbc.weightx = 1.0;
+                JLabel valueLabel = new JLabel(infoData[i][1]);
+                valueLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+                valueLabel.setForeground(Color.BLACK);
+                contentPanel.add(valueLabel, gbc);
+            }
+            
+            // Button panel
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+            buttonPanel.setBackground(Color.WHITE);
+            
+            JButton closeButton = new JButton("Hủy");
+            closeButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            closeButton.setBackground(new Color(108, 117, 125));
+            closeButton.setForeground(Color.WHITE);
+            closeButton.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+            closeButton.setFocusPainted(false);
+            closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            closeButton.setPreferredSize(new Dimension(100, 40));
+            
+            // Add hover effect
+            closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    closeButton.setBackground(new Color(90, 98, 104));
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    closeButton.setBackground(new Color(108, 117, 125));
+                }
+            });
+            
+            closeButton.addActionListener(e -> detailDialog.dispose());
+            
+            buttonPanel.add(closeButton);
+            
+            mainPanel.add(headerPanel, BorderLayout.NORTH);
+            mainPanel.add(contentPanel, BorderLayout.CENTER);
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+            
+            detailDialog.add(mainPanel);
+            detailDialog.setVisible(true);
         }
     }
 
@@ -955,6 +1101,27 @@ public class StudentManagementPanel extends JPanel {
             dialog.add(buttonPanel, BorderLayout.SOUTH);
             
             dialog.setVisible(true);
+        }
+    }
+    
+    // Helper method to convert classified to Vietnamese
+    private String getClassifiedInVietnamese(citd.nhom99.ck.model.constant.Classified classified) {
+        if (classified == null) {
+            return "Chưa xếp loại";
+        }
+        switch (classified) {
+            case XUAT_SAC:
+                return "Xuất sắc";
+            case GIOI:
+                return "Giỏi";
+            case KHA:
+                return "Khá";
+            case TRUNG_BINH:
+                return "Trung bình";
+            case YEU:
+                return "Yếu";
+            default:
+                return "Chưa xếp loại";
         }
     }
 }

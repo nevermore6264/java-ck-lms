@@ -41,6 +41,7 @@ import citd.nhom99.ck.model.constant.Role;
 import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.SubjectDAO;
 import citd.nhom99.ck.model.dao.TeacherDAO;
+import citd.nhom99.ck.utils.CustomDialog;
 import citd.nhom99.ck.utils.SubjectTranslator;
 
 public class TeacherManagementPanel extends JPanel {
@@ -930,15 +931,141 @@ public class TeacherManagementPanel extends JPanel {
                         studentList.toString()
                 );
 
-                JOptionPane.showMessageDialog(
-                        this,
-                        message,
-                        "Thông tin lớp chủ nhiệm",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                // Create custom dialog for class details
+                JDialog classDialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Thông tin lớp chủ nhiệm", true);
+                classDialog.setSize(500, 400);
+                classDialog.setLocationRelativeTo(this);
+                classDialog.setResizable(false);
+                
+                // Main panel
+                JPanel mainPanel = new JPanel(new BorderLayout());
+                mainPanel.setBackground(Color.WHITE);
+                mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+                
+                // Header panel
+                JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                headerPanel.setBackground(Color.WHITE);
+                
+                JLabel titleLabel = new JLabel("Thông tin lớp chủ nhiệm");
+                titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+                titleLabel.setForeground(new Color(52, 144, 220));
+                headerPanel.add(titleLabel);
+                
+                // Content panel
+                JPanel contentPanel = new JPanel(new java.awt.GridBagLayout());
+                contentPanel.setBackground(Color.WHITE);
+                contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+                
+                java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+                gbc.insets = new java.awt.Insets(8, 10, 8, 10);
+                gbc.anchor = java.awt.GridBagConstraints.WEST;
+                
+                // Class information
+                String[][] infoData = {
+                    {"Giáo viên:", teacher.getUser().getFullName()},
+                    {"Mã GV:", teacher.getTeacherCode()},
+                    {"Lớp chủ nhiệm:", classroom.getClassName()},
+                    {"Sĩ số:", String.valueOf(classroom.getStudents() != null ? classroom.getStudents().size() : 0) + " học sinh"}
+                };
+                
+                for (int i = 0; i < infoData.length; i++) {
+                    gbc.gridx = 0;
+                    gbc.gridy = i;
+                    gbc.fill = java.awt.GridBagConstraints.NONE;
+                    gbc.weightx = 0.0;
+                    JLabel labelLabel = new JLabel(infoData[i][0]);
+                    labelLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                    labelLabel.setForeground(new Color(52, 58, 64));
+                    contentPanel.add(labelLabel, gbc);
+                    
+                    gbc.gridx = 1;
+                    gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+                    gbc.weightx = 1.0;
+                    JLabel valueLabel = new JLabel(infoData[i][1]);
+                    valueLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+                    valueLabel.setForeground(Color.BLACK);
+                    contentPanel.add(valueLabel, gbc);
+                }
+                
+                // Student list
+                if (classroom.getStudents() != null && !classroom.getStudents().isEmpty()) {
+                    gbc.gridx = 0;
+                    gbc.gridy = infoData.length;
+                    gbc.gridwidth = 2;
+                    gbc.fill = java.awt.GridBagConstraints.BOTH;
+                    gbc.weightx = 1.0;
+                    gbc.weighty = 1.0;
+                    
+                    JLabel studentListLabel = new JLabel("<html><b>Danh sách học sinh:</b><br/>");
+                    studentListLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                    studentListLabel.setForeground(new Color(52, 58, 64));
+                    
+                    StringBuilder studentListHtml = new StringBuilder();
+                    for (int i = 0; i < classroom.getStudents().size(); i++) {
+                        Student student = classroom.getStudents().get(i);
+                        if (student != null && student.getUser() != null) {
+                            studentListHtml.append(String.format("%d. %s (%s)<br/>",
+                                    i + 1,
+                                    student.getUser().getFullName(),
+                                    student.getStudentCode()));
+                        } else {
+                            studentListHtml.append(String.format("%d. [Dữ liệu không hợp lệ]<br/>", i + 1));
+                        }
+                    }
+                    studentListLabel.setText("<html><b>Danh sách học sinh:</b><br/>" + studentListHtml.toString() + "</html>");
+                    
+                    contentPanel.add(studentListLabel, gbc);
+                } else {
+                    gbc.gridx = 0;
+                    gbc.gridy = infoData.length;
+                    gbc.gridwidth = 2;
+                    gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+                    gbc.weightx = 1.0;
+                    
+                    JLabel noStudentLabel = new JLabel("Lớp chưa có học sinh nào.");
+                    noStudentLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+                    noStudentLabel.setForeground(new Color(108, 117, 125));
+                    contentPanel.add(noStudentLabel, gbc);
+                }
+                
+                // Button panel
+                JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+                buttonPanel.setBackground(Color.WHITE);
+                
+                JButton closeButton = new JButton("Hủy");
+                closeButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                closeButton.setBackground(new Color(108, 117, 125));
+                closeButton.setForeground(Color.WHITE);
+                closeButton.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+                closeButton.setFocusPainted(false);
+                closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                closeButton.setPreferredSize(new Dimension(100, 40));
+                
+                // Add hover effect
+                closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent evt) {
+                        closeButton.setBackground(new Color(90, 98, 104));
+                    }
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent evt) {
+                        closeButton.setBackground(new Color(108, 117, 125));
+                    }
+                });
+                
+                closeButton.addActionListener(e -> classDialog.dispose());
+                
+                buttonPanel.add(closeButton);
+                
+                mainPanel.add(headerPanel, BorderLayout.NORTH);
+                mainPanel.add(contentPanel, BorderLayout.CENTER);
+                mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+                
+                classDialog.add(mainPanel);
+                classDialog.setVisible(true);
 
             } else {
-                JOptionPane.showMessageDialog(this, "Giáo viên chưa được phân lớp chủ nhiệm!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                CustomDialog.showInfoDialog(this, "Giáo viên chưa được phân lớp chủ nhiệm!", "Thông báo");
             }
         }
     }
@@ -995,31 +1122,32 @@ public class TeacherManagementPanel extends JPanel {
 
             // Create custom dialog
             JDialog detailsDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Chi tiết giáo viên", true);
-            detailsDialog.setLayout(new BorderLayout());
-            detailsDialog.setSize(600, 700);
-            detailsDialog.setLocationRelativeTo(null);
-            detailsDialog.getContentPane().setBackground(new Color(248, 249, 250));
-            detailsDialog.setResizable(true);
-            detailsDialog.setMinimumSize(new Dimension(500, 600));
+            detailsDialog.setSize(500, 400);
+            detailsDialog.setLocationRelativeTo(this);
+            detailsDialog.setResizable(false);
 
+            // Main panel
+            JPanel mainPanel = new JPanel(new BorderLayout());
+            mainPanel.setBackground(Color.WHITE);
+            mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+            
             // Header panel
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            headerPanel.setBackground(new Color(52, 58, 64));
-            headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-            JLabel titleLabel = new JLabel("📋 Thông tin chi tiết giáo viên");
-            titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-            titleLabel.setForeground(Color.WHITE);
+            headerPanel.setBackground(Color.WHITE);
+            
+            JLabel titleLabel = new JLabel("Thông tin chi tiết giáo viên");
+            titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            titleLabel.setForeground(new Color(52, 144, 220));
             headerPanel.add(titleLabel);
-
+            
             // Content panel
-            JPanel contentPanel = new JPanel(new GridBagLayout());
-            contentPanel.setBackground(new Color(248, 249, 250));
-            contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
-
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(15, 15, 15, 15);
-            gbc.anchor = GridBagConstraints.WEST;
+            JPanel contentPanel = new JPanel(new java.awt.GridBagLayout());
+            contentPanel.setBackground(Color.WHITE);
+            contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+            
+            java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+            gbc.insets = new java.awt.Insets(8, 10, 8, 10);
+            gbc.anchor = java.awt.GridBagConstraints.WEST;
 
             // Get classroom name
             String classroomName = "Chưa phân lớp";
@@ -1049,79 +1177,70 @@ public class TeacherManagementPanel extends JPanel {
                 }
             }
 
-            // Create info labels
+            // Teacher information
             String[][] infoData = {
-                    {"Mã giáo viên:", teacher.getTeacherCode()},
-                    {"Họ và tên:", teacher.getUser().getFullName()},
-                    {"Email:", teacher.getUser().getEmail()},
-                    {"Số điện thoại:", teacher.getUser().getPhoneNumber()},
-                    {"Giới tính:", getGenderInVietnamese(teacher.getUser().getGender())},
-                    {"Lớp chủ nhiệm:", classroomName},
-                    {"Môn dạy:", subjectName},
-                    {"ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
+                {"Mã GV:", teacher.getTeacherCode()},
+                {"Họ tên:", teacher.getUser().getFullName()},
+                {"Email:", teacher.getUser().getEmail()},
+                {"Số điện thoại:", teacher.getUser().getPhoneNumber()},
+                {"Giới tính:", getGenderInVietnamese(teacher.getUser().getGender())},
+                {"Lớp chủ nhiệm:", classroomName},
+                {"Môn dạy:", subjectName}
             };
-
+            
             for (int i = 0; i < infoData.length; i++) {
                 gbc.gridx = 0;
                 gbc.gridy = i;
-                gbc.fill = GridBagConstraints.NONE;
+                gbc.fill = java.awt.GridBagConstraints.NONE;
                 gbc.weightx = 0.0;
-
-                JLabel label = new JLabel(infoData[i][0]);
-                label.setFont(new Font("Arial", Font.BOLD, 16));
-                label.setForeground(new Color(52, 58, 64));
-                label.setPreferredSize(new Dimension(180, 30));
-                contentPanel.add(label, gbc);
-
+                JLabel labelLabel = new JLabel(infoData[i][0]);
+                labelLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                labelLabel.setForeground(new Color(52, 58, 64));
+                contentPanel.add(labelLabel, gbc);
+                
                 gbc.gridx = 1;
-                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
                 gbc.weightx = 1.0;
-
                 JLabel valueLabel = new JLabel(infoData[i][1]);
-                valueLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-                valueLabel.setForeground(new Color(73, 80, 87));
-                valueLabel.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                        BorderFactory.createEmptyBorder(10, 15, 10, 15)
-                ));
-                valueLabel.setOpaque(true);
-                valueLabel.setBackground(Color.WHITE);
+                valueLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+                valueLabel.setForeground(Color.BLACK);
                 contentPanel.add(valueLabel, gbc);
             }
 
             // Button panel
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            buttonPanel.setBackground(new Color(248, 249, 250));
-            buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-            JButton closeButton = new JButton("Đóng");
-            closeButton.setFont(new Font("Arial", Font.BOLD, 16));
-            closeButton.setPreferredSize(new Dimension(120, 45));
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+            buttonPanel.setBackground(Color.WHITE);
+            
+            JButton closeButton = new JButton("Hủy");
+            closeButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
             closeButton.setBackground(new Color(108, 117, 125));
             closeButton.setForeground(Color.WHITE);
+            closeButton.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
             closeButton.setFocusPainted(false);
-            closeButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
             closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            closeButton.addActionListener(e -> detailsDialog.dispose());
-
+            closeButton.setPreferredSize(new Dimension(100, 40));
+            
             // Add hover effect
             closeButton.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
                     closeButton.setBackground(new Color(90, 98, 104));
                 }
-
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent evt) {
                     closeButton.setBackground(new Color(108, 117, 125));
                 }
             });
-
+            
+            closeButton.addActionListener(e -> detailsDialog.dispose());
+            
             buttonPanel.add(closeButton);
 
-            detailsDialog.add(headerPanel, BorderLayout.NORTH);
-            detailsDialog.add(contentPanel, BorderLayout.CENTER);
-            detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
+            mainPanel.add(headerPanel, BorderLayout.NORTH);
+            mainPanel.add(contentPanel, BorderLayout.CENTER);
+            mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+            
+            detailsDialog.add(mainPanel);
             detailsDialog.setVisible(true);
         }
     }
