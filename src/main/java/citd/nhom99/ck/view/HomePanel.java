@@ -67,7 +67,7 @@ public class HomePanel extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
         // Welcome text
-        JLabel welcomeLabel = new JLabel("Chào mừng đến với Hệ thống quản lý lớp học");
+        JLabel welcomeLabel = new JLabel("Chào mừng đến với Hệ thống quản lý lớp học");
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);

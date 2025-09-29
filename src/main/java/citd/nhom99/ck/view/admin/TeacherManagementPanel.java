@@ -1,22 +1,47 @@
 package citd.nhom99.ck.view.admin;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+
 import citd.nhom99.ck.controller.TeacherController;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
+import citd.nhom99.ck.model.Subject;
 import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.User;
 import citd.nhom99.ck.model.constant.Gender;
 import citd.nhom99.ck.model.constant.Role;
 import citd.nhom99.ck.model.dao.ClassroomDAO;
+import citd.nhom99.ck.model.dao.SubjectDAO;
 import citd.nhom99.ck.model.dao.TeacherDAO;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import citd.nhom99.ck.utils.SubjectTranslator;
 
 public class TeacherManagementPanel extends JPanel {
     private final TeacherController teacherController = new TeacherController();
@@ -291,13 +316,7 @@ public class TeacherManagementPanel extends JPanel {
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
 
-        JComboBox<Gender> genderField = new JComboBox<>(Gender.values());
-        genderField.setFont(new Font("Arial", Font.PLAIN, 16));
-        genderField.setPreferredSize(new Dimension(300, 50));
-        genderField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
+        JComboBox<String> genderField = createGenderComboBox();
 
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -426,7 +445,7 @@ public class TeacherManagementPanel extends JPanel {
                 String fullName = fullNameField.getText();
                 String email = emailField.getText();
                 String phoneNumber = phoneNumberField.getText();
-                Gender gender = (Gender) genderField.getSelectedItem();
+                Gender gender = getGenderFromVietnamese((String) genderField.getSelectedItem());
 
                 User newTeacher = new User(username, password, fullName, phoneNumber, email, gender, Role.TEACHER);
                 teacherController.createTeacher(newTeacher);
@@ -520,14 +539,8 @@ public class TeacherManagementPanel extends JPanel {
                 BorderFactory.createEmptyBorder(15, 20, 15, 20)
         ));
 
-        JComboBox<Gender> genderField = new JComboBox<>(Gender.values());
-        genderField.setFont(new Font("Arial", Font.PLAIN, 16));
-        genderField.setPreferredSize(new Dimension(300, 50));
-        genderField.setSelectedItem(currentUser.getGender());
-        genderField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
-                BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
+        JComboBox<String> genderField = createGenderComboBox();
+        genderField.setSelectedItem(getGenderInVietnamese(currentUser.getGender()));
 
         // Add fields to form
         gbc.gridx = 0;
@@ -670,7 +683,7 @@ public class TeacherManagementPanel extends JPanel {
                 updatedUser.setFullName(fullNameField.getText().trim());
                 updatedUser.setEmail(emailField.getText().trim());
                 updatedUser.setPhoneNumber(phoneNumberField.getText().trim());
-                updatedUser.setGender((Gender) genderField.getSelectedItem());
+                updatedUser.setGender(getGenderFromVietnamese((String) genderField.getSelectedItem()));
                 updatedUser.setRole(Role.TEACHER);
 
                 // Update teacher
@@ -784,6 +797,20 @@ public class TeacherManagementPanel extends JPanel {
                     classroomName = "Không chủ nhiệm";
                 }
 
+                // Get subject name by subject ID
+                String subjectName = "Chưa phân môn";
+                if (teacher.getSubjectId() != 0) {
+                    try {
+                        SubjectDAO subjectDAO = new SubjectDAO();
+                        Subject subject = subjectDAO.getSubjectById(teacher.getSubjectId());
+                        if (subject != null) {
+                            subjectName = SubjectTranslator.convertToVietnamese(subject.getSubjectName());
+                        }
+                    } catch (Exception e) {
+                        subjectName = "Môn " + teacher.getSubjectId();
+                    }
+                }
+
                 Object[] rowData = {
                         teacher.getUser().getUserId(),
                         teacher.getTeacherCode(),
@@ -792,7 +819,7 @@ public class TeacherManagementPanel extends JPanel {
                         teacher.getUser().getPhoneNumber(),
                         getGenderInVietnamese(teacher.getUser().getGender()),
                         classroomName,
-                        teacher.getSubjectId()
+                        subjectName
                 };
                 tableModel.addRow(rowData);
             }
@@ -831,6 +858,25 @@ public class TeacherManagementPanel extends JPanel {
             case MALE -> "Nam";
             case FEMALE -> "Nữ";
             default -> "Không xác định";
+        };
+    }
+    
+    private JComboBox<String> createGenderComboBox() {
+        JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Nam", "Nữ"});
+        genderComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
+        genderComboBox.setPreferredSize(new Dimension(300, 50));
+        genderComboBox.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 2),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        return genderComboBox;
+    }
+    
+    private Gender getGenderFromVietnamese(String vietnameseGender) {
+        return switch (vietnameseGender) {
+            case "Nam" -> Gender.MALE;
+            case "Nữ" -> Gender.FEMALE;
+            default -> Gender.MALE;
         };
     }
 
@@ -901,6 +947,18 @@ public class TeacherManagementPanel extends JPanel {
         if (row >= 0 && row < allTeachers.size()) {
             Teacher teacher = allTeachers.get(row);
             if (teacher.getSubjectId() != 0) {
+                // Get subject name
+                String subjectName = "Môn " + teacher.getSubjectId();
+                try {
+                    SubjectDAO subjectDAO = new SubjectDAO();
+                    Subject subject = subjectDAO.getSubjectById(teacher.getSubjectId());
+                    if (subject != null) {
+                        subjectName = SubjectTranslator.convertToVietnamese(subject.getSubjectName());
+                    }
+                } catch (Exception e) {
+                    subjectName = "Môn " + teacher.getSubjectId();
+                }
+
                 String message = String.format(
                         "Thông tin môn dạy:\n\n" +
                                 "• Giáo viên: %s\n" +
@@ -909,7 +967,7 @@ public class TeacherManagementPanel extends JPanel {
                                 "• ID môn: %d",
                         teacher.getUser().getFullName(),
                         teacher.getTeacherCode(),
-                        "Môn " + teacher.getSubjectId(),
+                        subjectName,
                         teacher.getSubjectId()
                 );
 
@@ -977,6 +1035,20 @@ public class TeacherManagementPanel extends JPanel {
                 }
             }
 
+            // Get subject name
+            String subjectName = "Chưa phân môn";
+            if (teacher.getSubjectId() != 0) {
+                try {
+                    SubjectDAO subjectDAO = new SubjectDAO();
+                    Subject subject = subjectDAO.getSubjectById(teacher.getSubjectId());
+                    if (subject != null) {
+                        subjectName = SubjectTranslator.convertToVietnamese(subject.getSubjectName());
+                    }
+                } catch (Exception e) {
+                    subjectName = "Môn " + teacher.getSubjectId();
+                }
+            }
+
             // Create info labels
             String[][] infoData = {
                     {"Mã giáo viên:", teacher.getTeacherCode()},
@@ -985,7 +1057,7 @@ public class TeacherManagementPanel extends JPanel {
                     {"Số điện thoại:", teacher.getUser().getPhoneNumber()},
                     {"Giới tính:", getGenderInVietnamese(teacher.getUser().getGender())},
                     {"Lớp chủ nhiệm:", classroomName},
-                    {"Môn dạy:", teacher.getSubjectId() != 0 ? "Môn " + teacher.getSubjectId() : "Chưa phân môn"},
+                    {"Môn dạy:", subjectName},
                     {"ID người dùng:", String.valueOf(teacher.getUser().getUserId())}
             };
 

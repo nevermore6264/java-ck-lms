@@ -209,7 +209,12 @@ public class StudentManagementPanel extends JPanel {
             if (value != null && !value.toString().equals("Chưa có lớp") && !value.toString().equals("Chưa có điểm")) {
                 // Make it look like a link
                 c.setForeground(new Color(0, 102, 204)); // Blue color
-                c.setFont(c.getFont().deriveFont(Font.ITALIC | Font.BOLD)); // Underline
+                c.setFont(c.getFont().deriveFont(Font.BOLD)); // Bold
+                // Note: Java Swing doesn't support underline directly, but we can use HTML
+                if (c instanceof JLabel) {
+                    JLabel label = (JLabel) c;
+                    label.setText("<html><u>" + value.toString() + "</u></html>");
+                }
             } else {
                 // Regular text for "Chưa có lớp" or "Chưa có điểm"
                 c.setForeground(Color.BLACK);

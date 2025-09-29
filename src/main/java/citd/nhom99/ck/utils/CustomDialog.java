@@ -292,7 +292,7 @@ public class CustomDialog {
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         headerPanel.setBackground(Color.WHITE);
         
-        JLabel titleLabel = new JLabel("📅 Thời khóa biểu lớp " + className);
+        JLabel titleLabel = new JLabel("Thời khóa biểu lớp " + className);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(new Color(52, 144, 220));
         headerPanel.add(titleLabel);

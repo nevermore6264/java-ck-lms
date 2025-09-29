@@ -15,7 +15,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,6 +24,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
@@ -224,6 +224,60 @@ public class ClassroomManagementPanel extends JPanel {
         classroomTable.setShowGrid(true);
         classroomTable.setIntercellSpacing(new Dimension(0, 1));
         
+        // Set custom cell renderer to highlight GVCN names
+        classroomTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                java.awt.Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                // Set background based on selection
+                if (isSelected) {
+                    c.setBackground(new Color(52, 144, 220));
+                    c.setForeground(Color.WHITE);
+                    c.setFont(new Font("Arial", Font.PLAIN, 13)); // Normal font when selected
+                } else {
+                    c.setBackground(Color.WHITE);
+                    
+                    // Check if this is the GVCN column (column 2) and has a teacher
+                    if (column == 2 && value != null && !value.toString().trim().isEmpty() && !value.toString().equals("Chưa có")) {
+                        // Make GVCN name bold
+                        c.setFont(new Font("Arial", Font.BOLD, 13));
+                        c.setForeground(new Color(21, 87, 36)); // Dark green color
+                    } else {
+                        // Normal font for other cells
+                        c.setFont(new Font("Arial", Font.PLAIN, 13));
+                        c.setForeground(Color.BLACK);
+                    }
+                }
+                
+                return c;
+            }
+        });
+        
+        // Add tooltip for table rows
+        classroomTable.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(java.awt.event.MouseEvent e) {
+                int row = classroomTable.rowAtPoint(e.getPoint());
+                if (row >= 0 && row < allClassrooms.size()) {
+                    Classroom classroom = allClassrooms.get(row);
+                    String tooltip = String.format(
+                        "<html><b>%s</b><br/>" +
+                        "ID: %d<br/>" +
+                        "GVCN: %s<br/>" +
+                        "Sĩ số: %d học sinh</html>",
+                        classroom.getClassName(),
+                        classroom.getClassId(),
+                        classroom.getTeacher() != null ? classroom.getTeacher().getUser().getFullName() : "Chưa có",
+                        classroom.getStudents() != null ? classroom.getStudents().size() : 0
+                    );
+                    classroomTable.setToolTipText(tooltip);
+                } else {
+                    classroomTable.setToolTipText(null);
+                }
+            }
+        });
+        
         // Customize table header
         JTableHeader header = classroomTable.getTableHeader();
         header.setFont(new Font("Arial", Font.BOLD, 14));
@@ -244,6 +298,7 @@ public class ClassroomManagementPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 20));
         buttonPanel.setBackground(new Color(248, 249, 250));
 
+        JButton addButton = createStyledButton("Thêm lớp học", new Color(39, 174, 96));
         editButton = createStyledButton("Sửa thông tin", new Color(52, 152, 219));
         deleteButton = createStyledButton("Xóa lớp học", new Color(231, 76, 60));
         JButton assignTeacherButton = createStyledButton("Gắn GVCN", new Color(46, 204, 113));
@@ -251,6 +306,7 @@ public class ClassroomManagementPanel extends JPanel {
         JButton viewScheduleButton = createStyledButton("Xem thời khóa biểu", new Color(155, 89, 182));
         refreshButton = createStyledButton("Làm mới", new Color(149, 165, 166));
 
+        addButton.addActionListener(e -> handleAddClassroom());
         editButton.addActionListener(e -> handleEditClassroom());
         deleteButton.addActionListener(e -> handleDeleteClassroom());
         assignTeacherButton.addActionListener(e -> handleAssignTeacher());
@@ -258,6 +314,7 @@ public class ClassroomManagementPanel extends JPanel {
         viewScheduleButton.addActionListener(e -> handleViewSchedule());
         refreshButton.addActionListener(e -> loadClassroomData());
 
+        buttonPanel.add(addButton);
         buttonPanel.add(editButton);
         buttonPanel.add(deleteButton);
         buttonPanel.add(assignTeacherButton);
@@ -298,29 +355,6 @@ public class ClassroomManagementPanel extends JPanel {
         return button;
     }
 
-    private void handleAddClassroom() {
-        JTextField classNameField = new JTextField();
-        JComboBox<Teacher> classTeacherField = new JComboBox<>();
-        classTeacherField.setEditable(true);
-        final JComponent[] inputs = new JComponent[]{
-                new JLabel("Tên lớp"),
-                classNameField,
-                new JLabel("Giáo viên chủ nhiệm"),
-                classTeacherField
-        };
-        int result = JOptionPane.showConfirmDialog(this, inputs, "Thêm lớp học mới", JOptionPane.OK_CANCEL_OPTION);
-        if (result == JOptionPane.OK_OPTION) {
-            String classId = classNameField.getText();
-            String className = (String) classTeacherField.getSelectedItem();
-            if (classId != null && !classId.trim().isEmpty() && className != null && !className.trim().isEmpty()) {
-                Classroom newClassroom = new Classroom(className);
-                classroomController.createClassroom(newClassroom);
-                loadClassroomData();
-            } else {
-                JOptionPane.showMessageDialog(this, "ID và tên lớp không được để trống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
 
     private void handleEditClassroom() {
         int selectedRow = classroomTable.getSelectedRow();
@@ -881,5 +915,148 @@ public class ClassroomManagementPanel extends JPanel {
             case FEMALE -> "Nữ";
             default -> "Không xác định";
         };
+    }
+    
+    private void handleAddClassroom() {
+        // Tạo dialog thêm lớp học
+        JDialog addDialog = new JDialog((java.awt.Frame) SwingUtilities.getWindowAncestor(this), "Thêm lớp học mới", true);
+        addDialog.setSize(500, 300);
+        addDialog.setLocationRelativeTo(this);
+        addDialog.setResizable(false);
+        
+        // Main panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        
+        // Header panel
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        headerPanel.setBackground(Color.WHITE);
+        
+        JLabel titleLabel = new JLabel("Thêm lớp học mới");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(52, 144, 220));
+        headerPanel.add(titleLabel);
+        
+        // Form panel
+        JPanel formPanel = new JPanel(new java.awt.GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        
+        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+        gbc.insets = new java.awt.Insets(10, 10, 10, 10);
+        gbc.anchor = java.awt.GridBagConstraints.WEST;
+        
+        // Tên lớp
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = java.awt.GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        JLabel classNameLabel = new JLabel("Tên lớp:");
+        classNameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formPanel.add(classNameLabel, gbc);
+        
+        gbc.gridx = 1;
+        gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        JTextField classNameField = new JTextField(20);
+        classNameField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        classNameField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        formPanel.add(classNameField, gbc);
+        
+        // Button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        
+        JButton saveButton = new JButton("Lưu");
+        saveButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        saveButton.setBackground(new Color(52, 144, 220));
+        saveButton.setForeground(Color.WHITE);
+        saveButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        saveButton.setFocusPainted(false);
+        saveButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        saveButton.setPreferredSize(new Dimension(100, 40));
+        
+        JButton cancelButton = new JButton("Hủy");
+        cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        cancelButton.setBackground(new Color(108, 117, 125));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        cancelButton.setFocusPainted(false);
+        cancelButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        cancelButton.setPreferredSize(new Dimension(100, 40));
+        
+        // Add hover effects
+        saveButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                saveButton.setBackground(new Color(41, 128, 185));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                saveButton.setBackground(new Color(52, 144, 220));
+            }
+        });
+        
+        cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelButton.setBackground(new Color(90, 98, 104));
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelButton.setBackground(new Color(108, 117, 125));
+            }
+        });
+        
+        saveButton.addActionListener(e -> {
+            String className = classNameField.getText().trim();
+            if (className.isEmpty()) {
+                CustomDialog.showWarningDialog(addDialog, "Vui lòng nhập tên lớp học!", "Cảnh báo");
+                return;
+            }
+            
+            // Kiểm tra tên lớp đã tồn tại chưa
+            boolean exists = allClassrooms.stream()
+                .anyMatch(c -> c.getClassName().equalsIgnoreCase(className));
+            
+            if (exists) {
+                CustomDialog.showWarningDialog(addDialog, "Tên lớp học đã tồn tại!", "Cảnh báo");
+                return;
+            }
+            
+            try {
+                // Tạo lớp học mới
+                Classroom newClassroom = new Classroom();
+                newClassroom.setClassName(className);
+                newClassroom.setTeacherId(0); // Chưa có GVCN
+                
+                // Lưu vào database
+                ClassroomDAO classroomDAO = new ClassroomDAO();
+                int newClassroomId = classroomDAO.createClassroom(newClassroom);
+                
+                CustomDialog.showInfoDialog(addDialog, "Thêm lớp học thành công!", "Thành công");
+                addDialog.dispose();
+                loadClassroomData(); // Refresh danh sách
+                
+            } catch (Exception ex) {
+                CustomDialog.showWarningDialog(addDialog, "Lỗi khi thêm lớp học: " + ex.getMessage(), "Lỗi");
+            }
+        });
+        
+        cancelButton.addActionListener(e -> addDialog.dispose());
+        
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+        
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        addDialog.add(mainPanel);
+        addDialog.setVisible(true);
     }
 }
