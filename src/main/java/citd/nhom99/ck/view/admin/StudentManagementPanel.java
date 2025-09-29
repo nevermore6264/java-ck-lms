@@ -38,6 +38,7 @@ import citd.nhom99.ck.model.constant.Gender;
 import citd.nhom99.ck.model.constant.Role;
 import citd.nhom99.ck.model.dao.ClassroomDAO;
 import citd.nhom99.ck.model.dao.UserDAO;
+import citd.nhom99.ck.utils.CustomDialog;
 
 public class StudentManagementPanel extends JPanel {
     private final UserDAO userDAO = new UserDAO();
@@ -410,7 +411,7 @@ public class StudentManagementPanel extends JPanel {
         System.out.println("Edit student clicked");
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh cần chỉnh sửa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Vui lòng chọn học sinh cần chỉnh sửa!", "Cảnh báo");
             return;
         }
 
@@ -569,7 +570,7 @@ public class StudentManagementPanel extends JPanel {
         System.out.println("Selected view row: " + studentTable.getSelectedRow());
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh cần xóa!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Vui lòng chọn học sinh cần xóa!", "Cảnh báo");
             return;
         }
 
@@ -597,15 +598,9 @@ public class StudentManagementPanel extends JPanel {
             userId, studentCode, fullName, email, phoneNumber, gender, className
         );
 
-        int confirm = JOptionPane.showConfirmDialog(
-            this, 
-            message, 
-            "Xác nhận xóa học sinh", 
-            JOptionPane.YES_NO_OPTION, 
-            JOptionPane.WARNING_MESSAGE
-        );
+        boolean confirm = CustomDialog.showConfirmDialog(this, message, "Xác nhận xóa học sinh");
         
-        if (confirm == JOptionPane.YES_OPTION) {
+        if (confirm) {
             try {
             studentController.deleteStudent(userId);
                 JOptionPane.showMessageDialog(this, "Xóa học sinh thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
@@ -808,7 +803,7 @@ public class StudentManagementPanel extends JPanel {
     private void handleViewStudentDetails() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để xem chi tiết!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Vui lòng chọn học sinh để xem chi tiết!", "Cảnh báo");
             return;
         }
 
@@ -838,19 +833,14 @@ public class StudentManagementPanel extends JPanel {
                     student.getStudentGrade().getClassified().toString() : "Chưa xếp loại"
             );
 
-            JOptionPane.showMessageDialog(
-                this, 
-                message, 
-                "Chi tiết học sinh", 
-                JOptionPane.INFORMATION_MESSAGE
-            );
+            CustomDialog.showInfoDialog(this, message, "Chi tiết học sinh");
         }
     }
 
     private void handleAssignClass() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để phân lớp!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Vui lòng chọn học sinh để phân lớp!", "Cảnh báo");
             return;
         }
 

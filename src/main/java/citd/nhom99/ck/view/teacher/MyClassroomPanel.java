@@ -31,6 +31,7 @@ import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
 import citd.nhom99.ck.model.Teacher;
 import citd.nhom99.ck.model.dao.StudentDAO;
+import citd.nhom99.ck.utils.CustomDialog;
 
 public class MyClassroomPanel extends JPanel {
     private JTable studentTable;
@@ -304,7 +305,7 @@ public class MyClassroomPanel extends JPanel {
     private void handleViewDetails() {
         int selectedRow = studentTable.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn học sinh để xem chi tiết!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            CustomDialog.showWarningDialog(this, "Vui lòng chọn học sinh để xem chi tiết!", "Cảnh báo");
             return;
         }
 
@@ -331,12 +332,7 @@ public class MyClassroomPanel extends JPanel {
             userId, studentCode, fullName, email, phoneNumber, gender, averageGrade
         );
 
-        JOptionPane.showMessageDialog(
-            this, 
-            message, 
-            "Chi tiết học sinh", 
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        CustomDialog.showInfoDialog(this, message, "Chi tiết học sinh");
     }
 
     private void handleExport() {

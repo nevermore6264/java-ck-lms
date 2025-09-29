@@ -732,6 +732,14 @@ public class ClassroomManagementPanel extends JPanel {
                             ClassroomDAO classroomDAO = new ClassroomDAO();
                             classroomDAO.updateClassroom(classroom);
                             System.out.println("DEBUG: Updated classroom " + classroom.getClassId() + " with teacher ID " + newTeacherId);
+                            
+                            // Also update teacher's classroom_id to maintain consistency
+                            if (selectedTeacherObj != null) {
+                                selectedTeacherObj.setClassroomId(classroom.getClassId());
+                                TeacherDAO teacherDAO = new TeacherDAO();
+                                teacherDAO.updateTeacher(selectedTeacherObj);
+                                System.out.println("DEBUG: Updated teacher " + selectedTeacherObj.getTeacherCode() + " with classroom ID " + classroom.getClassId());
+                            }
                         } catch (Exception dbEx) {
                             System.out.println("DEBUG: Error updating classroom in database: " + dbEx.getMessage());
                             throw dbEx;

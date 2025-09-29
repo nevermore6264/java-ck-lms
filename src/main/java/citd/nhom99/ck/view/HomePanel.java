@@ -42,7 +42,7 @@ public class HomePanel extends JPanel {
         
         setLayout(new BorderLayout());
         setBackground(new Color(248, 249, 250));
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         
         initializeComponents();
     }
@@ -87,7 +87,7 @@ public class HomePanel extends JPanel {
     private JPanel createContentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(new Color(248, 249, 250));
-        panel.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 30, 40, 30));
         
         // Welcome message based on user role
         JPanel welcomePanel = createWelcomePanel();
@@ -227,7 +227,7 @@ public class HomePanel extends JPanel {
         }
         
         JLabel welcomeLabel = new JLabel(welcomeText);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 28));
         welcomeLabel.setForeground(new Color(52, 58, 64));
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
@@ -250,8 +250,8 @@ public class HomePanel extends JPanel {
         chartsRow.setBackground(new Color(248, 249, 250));
         chartsRow.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         
-        chartsRow.add(createChartPanel("Thống kê Học sinh", new Color(52, 144, 220)));
-        chartsRow.add(createChartPanel("Thống kê Giáo viên", new Color(40, 167, 69)));
+        chartsRow.add(createBeautifulChartPanel("Thống kê Học sinh", new Color(52, 144, 220)));
+        chartsRow.add(createBeautifulChartPanel("Số GVCN theo khối", new Color(40, 167, 69)));
         
         panel.add(chartsRow, BorderLayout.CENTER);
         
@@ -280,39 +280,37 @@ public class HomePanel extends JPanel {
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         
-        // Icon and title panel
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.WHITE);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        // Single row layout: Icon + Title + Value
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
         
+        // Icon on the left
         JLabel iconLabel = new JLabel(icon);
-        iconLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
         iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        iconLabel.setPreferredSize(new Dimension(30, 30));
         
+        // Title in the center
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 12));
         titleLabel.setForeground(new Color(100, 100, 100));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
-        headerPanel.add(iconLabel, BorderLayout.NORTH);
-        headerPanel.add(titleLabel, BorderLayout.SOUTH);
-        
-        // Value panel
-        JPanel valuePanel = new JPanel(new BorderLayout());
-        valuePanel.setBackground(Color.WHITE);
-        
+        // Value on the right
         JLabel valueLabel = new JLabel(String.valueOf(value));
-        valueLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        valueLabel.setFont(new Font("Arial", Font.BOLD, 24));
         valueLabel.setForeground(color);
         valueLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        valueLabel.setPreferredSize(new Dimension(40, 30));
         
-        valuePanel.add(valueLabel, BorderLayout.CENTER);
+        contentPanel.add(iconLabel, BorderLayout.WEST);
+        contentPanel.add(titleLabel, BorderLayout.CENTER);
+        contentPanel.add(valueLabel, BorderLayout.EAST);
         
-        card.add(headerPanel, BorderLayout.NORTH);
-        card.add(valuePanel, BorderLayout.CENTER);
+        card.add(contentPanel, BorderLayout.CENTER);
         
         return card;
     }
@@ -347,7 +345,7 @@ public class HomePanel extends JPanel {
             };
         } else {
             Map<String, Integer> chartData = getTeacherStatistics();
-            labels = new String[]{"Lớp 10", "Lớp 11", "Lớp 12", "Tổng GV"};
+            labels = new String[]{"Lớp 10", "Lớp 11", "Lớp 12", "Tổng GVCN"};
             values = new int[]{
                 chartData.getOrDefault("Lớp 10", 0),
                 chartData.getOrDefault("Lớp 11", 0),
@@ -437,6 +435,168 @@ public class HomePanel extends JPanel {
         return chartPanel;
     }
     
+    private JPanel createBeautifulChartPanel(String title, Color color) {
+        JPanel chartPanel = new JPanel(new BorderLayout());
+        chartPanel.setBackground(Color.WHITE);
+        chartPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        
+        // Title with icon
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        titlePanel.setBackground(Color.WHITE);
+        
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        titleLabel.setForeground(color);
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titlePanel.add(titleLabel, BorderLayout.CENTER);
+        
+        chartPanel.add(titlePanel, BorderLayout.NORTH);
+        
+        // Get real data based on chart type
+        String[] labels;
+        int[] values;
+        
+        if (title.contains("Học sinh")) {
+            Map<String, Integer> chartData = getStudentStatistics();
+            labels = new String[]{"Lớp 10", "Lớp 11", "Lớp 12", "Tổng HS"};
+            values = new int[]{
+                chartData.getOrDefault("Lớp 10", 0),
+                chartData.getOrDefault("Lớp 11", 0), 
+                chartData.getOrDefault("Lớp 12", 0),
+                chartData.getOrDefault("Tổng", 0)
+            };
+        } else {
+            Map<String, Integer> chartData = getTeacherStatistics();
+            labels = new String[]{"Lớp 10", "Lớp 11", "Lớp 12", "Tổng GVCN"};
+            values = new int[]{
+                chartData.getOrDefault("Lớp 10", 0),
+                chartData.getOrDefault("Lớp 11", 0),
+                chartData.getOrDefault("Lớp 12", 0), 
+                chartData.getOrDefault("Tổng", 0)
+            };
+        }
+        
+        // Beautiful chart area
+        JPanel chartArea = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                int width = getWidth();
+                int height = getHeight();
+                
+                // Clear background
+                g2d.setColor(Color.WHITE);
+                g2d.fillRect(0, 0, width, height);
+                
+                // Draw subtle grid
+                g2d.setColor(new Color(245, 245, 245));
+                g2d.setStroke(new java.awt.BasicStroke(1));
+                for (int i = 0; i < height; i += 25) {
+                    g2d.drawLine(0, i, width, i);
+                }
+                
+                // Chart dimensions
+                int margin = 50;
+                int chartWidth = width - 2 * margin;
+                int chartHeight = height - 2 * margin;
+                int baseY = margin + chartHeight;
+                
+                // Find max value for scaling
+                int maxValue = 0;
+                for (int value : values) {
+                    if (value > maxValue) maxValue = value;
+                }
+                if (maxValue == 0) maxValue = 1;
+                
+                // Draw Y-axis grid lines
+                g2d.setColor(new Color(230, 230, 230));
+                for (int i = 0; i <= 5; i++) {
+                    int y = margin + (chartHeight * i / 5);
+                    g2d.drawLine(margin, y, margin + chartWidth, y);
+                }
+                
+                // Draw bars
+                int barWidth = Math.max(35, chartWidth / (values.length * 2));
+                int spacing = Math.max(15, (chartWidth - values.length * barWidth) / (values.length + 1));
+                int startX = margin + spacing;
+                
+                for (int i = 0; i < values.length; i++) {
+                    int barHeight = (int) ((double) values[i] / maxValue * chartHeight);
+                    int x = startX + i * (barWidth + spacing);
+                    int y = baseY - barHeight;
+                    
+                    // Create beautiful gradient
+                    Color lightColor = new Color(
+                        Math.min(255, color.getRed() + 50),
+                        Math.min(255, color.getGreen() + 50),
+                        Math.min(255, color.getBlue() + 50)
+                    );
+                    Color darkColor = new Color(
+                        Math.max(0, color.getRed() - 30),
+                        Math.max(0, color.getGreen() - 30),
+                        Math.max(0, color.getBlue() - 30)
+                    );
+                    
+                    java.awt.GradientPaint barGradient = new java.awt.GradientPaint(
+                        x, y, lightColor,
+                        x, y + barHeight, darkColor
+                    );
+                    g2d.setPaint(barGradient);
+                    
+                    // Draw bar with rounded corners
+                    g2d.fillRoundRect(x, y, barWidth, barHeight, 15, 15);
+                    
+                    // Draw inner highlight
+                    g2d.setColor(new Color(255, 255, 255, 120));
+                    g2d.fillRoundRect(x + 3, y + 3, barWidth - 6, Math.min(barHeight / 4, 20), 10, 10);
+                    
+                    // Draw bar border
+                    g2d.setColor(new Color(
+                        Math.max(0, color.getRed() - 50),
+                        Math.max(0, color.getGreen() - 50),
+                        Math.max(0, color.getBlue() - 50)
+                    ));
+                    g2d.setStroke(new java.awt.BasicStroke(2));
+                    g2d.drawRoundRect(x, y, barWidth, barHeight, 15, 15);
+                    
+                    // Draw value on top with background
+                    if (values[i] > 0) {
+                        String valueText = String.valueOf(values[i]);
+                        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+                        int textWidth = g2d.getFontMetrics().stringWidth(valueText);
+                        
+                        // Background for value
+                        g2d.setColor(new Color(255, 255, 255, 220));
+                        g2d.fillRoundRect(x + (barWidth - textWidth) / 2 - 6, y - 30, textWidth + 12, 22, 11, 11);
+                        
+                        // Value text
+                        g2d.setColor(new Color(50, 50, 50));
+                        g2d.drawString(valueText, x + (barWidth - textWidth) / 2, y - 12);
+                    }
+                    
+                    // Draw label below
+                    g2d.setColor(new Color(70, 70, 70));
+                    g2d.setFont(new Font("Arial", Font.BOLD, 12));
+                    int labelWidth = g2d.getFontMetrics().stringWidth(labels[i]);
+                    g2d.drawString(labels[i], x + (barWidth - labelWidth) / 2, baseY + 25);
+                }
+                
+                g2d.dispose();
+            }
+        };
+        chartArea.setPreferredSize(new Dimension(450, 350));
+        chartArea.setBackground(Color.WHITE);
+        chartPanel.add(chartArea, BorderLayout.CENTER);
+        
+        return chartPanel;
+    }
+    
     private JPanel createCompactQuickAccessPanel() {
         JPanel panel = new JPanel(new GridLayout(1, 4, 15, 15));
         panel.setBackground(new Color(248, 249, 250));
@@ -463,33 +623,32 @@ public class HomePanel extends JPanel {
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+            BorderFactory.createEmptyBorder(8, 8, 8, 8)
         ));
         
-        // Create smaller icon panel
+        // Single row layout: Icon + Title + Button
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+        
+        // Icon on the left
         JPanel iconPanel = createCompactIconPanel(color);
+        iconPanel.setPreferredSize(new Dimension(24, 24));
         
-        // Title with icon
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(Color.WHITE);
-        titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
-        
+        // Title in the center
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 12));
         titleLabel.setForeground(color);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         
-        titlePanel.add(iconPanel, BorderLayout.NORTH);
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
-        
-        // Action button
+        // Action button on the right
         JButton actionButton = new JButton("Truy cập");
-        actionButton.setFont(new Font("Arial", Font.BOLD, 11));
+        actionButton.setFont(new Font("Arial", Font.BOLD, 10));
         actionButton.setBackground(color);
         actionButton.setForeground(Color.WHITE);
-        actionButton.setBorder(BorderFactory.createEmptyBorder(6, 15, 6, 15));
+        actionButton.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
         actionButton.setFocusPainted(false);
         actionButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        actionButton.setPreferredSize(new Dimension(70, 25));
         
         // Add hover effect
         actionButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -514,8 +673,11 @@ public class HomePanel extends JPanel {
             }
         });
         
-        card.add(titlePanel, BorderLayout.CENTER);
-        card.add(actionButton, BorderLayout.SOUTH);
+        contentPanel.add(iconPanel, BorderLayout.WEST);
+        contentPanel.add(titleLabel, BorderLayout.CENTER);
+        contentPanel.add(actionButton, BorderLayout.EAST);
+        
+        card.add(contentPanel, BorderLayout.CENTER);
         
         return card;
     }
@@ -530,16 +692,16 @@ public class HomePanel extends JPanel {
                 
                 // Draw a smaller circle icon
                 g2d.setColor(color);
-                g2d.fillOval(8, 8, 16, 16);
+                g2d.fillOval(4, 4, 12, 12);
                 
                 // Draw a smaller inner circle
                 g2d.setColor(Color.WHITE);
-                g2d.fillOval(12, 12, 8, 8);
+                g2d.fillOval(7, 7, 6, 6);
                 
                 g2d.dispose();
             }
         };
-        iconPanel.setPreferredSize(new Dimension(32, 32));
+        iconPanel.setPreferredSize(new Dimension(24, 24));
         iconPanel.setBackground(Color.WHITE);
         return iconPanel;
     }
@@ -556,6 +718,7 @@ public class HomePanel extends JPanel {
                     "COUNT(*) as student_count " +
                     "FROM students s " +
                     "LEFT JOIN classrooms c ON s.class_id = c.class_id " +
+                    "WHERE c.class_id IS NOT NULL " +
                     "GROUP BY grade_level";
         
         try (Connection conn = DBConfig.getConnection();
@@ -592,10 +755,9 @@ public class HomePanel extends JPanel {
                     "  WHEN c.class_name LIKE '12%' THEN 'Lớp 12' " +
                     "  ELSE 'Khác' " +
                     "END as grade_level, " +
-                    "COUNT(DISTINCT t.user_id) as teacher_count " +
-                    "FROM teachers t " +
-                    "LEFT JOIN classrooms c ON t.classroom_id = c.class_id " +
-                    "WHERE t.classroom_id > 0 " +
+                    "COUNT(DISTINCT c.gvcn_id) as teacher_count " +
+                    "FROM classrooms c " +
+                    "WHERE c.gvcn_id > 0 " +
                     "GROUP BY grade_level";
         
         try (Connection conn = DBConfig.getConnection();
@@ -627,7 +789,7 @@ public class HomePanel extends JPanel {
         Map<String, Integer> stats = new HashMap<>();
         
         try (Connection conn = DBConfig.getConnection()) {
-            // Total students
+            // Total students (all students in students table)
             String studentSql = "SELECT COUNT(*) as total FROM students";
             try (PreparedStatement pstmt = conn.prepareStatement(studentSql);
                  ResultSet rs = pstmt.executeQuery()) {
@@ -636,7 +798,7 @@ public class HomePanel extends JPanel {
                 }
             }
             
-            // Total teachers
+            // Total teachers (all teachers in teachers table)
             String teacherSql = "SELECT COUNT(*) as total FROM teachers";
             try (PreparedStatement pstmt = conn.prepareStatement(teacherSql);
                  ResultSet rs = pstmt.executeQuery()) {
@@ -655,7 +817,7 @@ public class HomePanel extends JPanel {
             }
             
             // Classrooms with homeroom teachers
-            String classroomWithTeacherSql = "SELECT COUNT(*) as total FROM classrooms WHERE teacher_id > 0";
+            String classroomWithTeacherSql = "SELECT COUNT(*) as total FROM classrooms WHERE gvcn_id > 0";
             try (PreparedStatement pstmt = conn.prepareStatement(classroomWithTeacherSql);
                  ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {

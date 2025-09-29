@@ -755,18 +755,19 @@ public class TeacherManagementPanel extends JPanel {
         tableModel.setRowCount(0);
             for (Teacher teacher : teachers) {
                 if (teacher.getUser() != null) {
-                // Get classroom name
+                // Get classroom name by finding classroom where this teacher is GVCN
                 String classroomName = "Không chủ nhiệm";
-                if (teacher.getClassroomId() != 0) {
-                    try {
-                        ClassroomDAO classroomDAO = new ClassroomDAO();
-                        Classroom classroom = classroomDAO.getClassroomById(teacher.getClassroomId());
-                        if (classroom != null) {
+                try {
+                    ClassroomDAO classroomDAO = new ClassroomDAO();
+                    List<Classroom> allClassrooms = classroomDAO.getAllClassrooms();
+                    for (Classroom classroom : allClassrooms) {
+                        if (classroom.getTeacherId() == teacher.getUser().getUserId()) {
                             classroomName = classroom.getClassName();
+                            break;
                         }
-                    } catch (Exception e) {
-                        classroomName = "Lớp " + teacher.getClassroomId();
                     }
+                } catch (Exception e) {
+                    classroomName = "Không chủ nhiệm";
                 }
 
                     Object[] rowData = {
@@ -822,11 +823,20 @@ public class TeacherManagementPanel extends JPanel {
     private void handleClassClick(int row) {
         if (row >= 0 && row < allTeachers.size()) {
             Teacher teacher = allTeachers.get(row);
-            if (teacher.getClassroomId() != 0) {
-                try {
-                    // Load classroom information
-                    ClassroomDAO classroomDAO = new ClassroomDAO();
-                    Classroom classroom = classroomDAO.getClassroomById(teacher.getClassroomId());
+            
+            // Find classroom where this teacher is GVCN
+            try {
+                ClassroomDAO classroomDAO = new ClassroomDAO();
+                List<Classroom> allClassrooms = classroomDAO.getAllClassrooms();
+                Classroom classroom = null;
+                for (Classroom c : allClassrooms) {
+                    if (c.getTeacherId() == teacher.getUser().getUserId()) {
+                        classroom = c;
+                        break;
+                    }
+                }
+                
+                if (classroom != null) {
                     
                     if (classroom != null) {
                         // Build student list
@@ -1203,6 +1213,14 @@ public class TeacherManagementPanel extends JPanel {
                         // Update teacher's classroom
                         teacher.setClassroomId(newClassroomId);
                         teacherController.updateTeacher(teacher);
+                        
+                        // Also update classroom's gvcn_id to maintain consistency
+                        if (selectedClassroom != null) {
+                            selectedClassroom.setTeacherId(teacher.getUser().getUserId());
+                            ClassroomDAO classroomDAO = new ClassroomDAO();
+                            classroomDAO.updateClassroom(selectedClassroom);
+                            System.out.println("DEBUG: Updated classroom " + selectedClassroom.getClassId() + " with teacher ID " + teacher.getUser().getUserId());
+                        }
                         
                         JOptionPane.showMessageDialog(dialog, "Phân lớp thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                         dialog.dispose();
