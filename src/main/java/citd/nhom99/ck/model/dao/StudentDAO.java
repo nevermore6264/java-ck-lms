@@ -1,12 +1,5 @@
 package citd.nhom99.ck.model.dao;
 
-import citd.nhom99.ck.config.DBConfig;
-import citd.nhom99.ck.model.StudentGrade;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.Student;
-import citd.nhom99.ck.model.User;
-import citd.nhom99.ck.utils.Helper;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,15 +7,21 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import citd.nhom99.ck.config.DBConfig;
+import citd.nhom99.ck.model.Student;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.constant.Role;
+import citd.nhom99.ck.utils.Helper;
+
 public class StudentDAO {
     private final UserDAO userDAO = new UserDAO();
-    private StudentGradeDAO studentGradeDAO = new StudentGradeDAO();
+    private final StudentGradeDAO studentGradeDAO = new StudentGradeDAO();
 
     public StudentDAO() {
     }
 
     public void createStudent(User student) {
-        String sql = "INSERT INTO students (student_id, student_code) VALUES(?, ?)";
+        String sql = "INSERT INTO students (user_id, student_code) VALUES(?, ?)";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
 
@@ -40,7 +39,9 @@ public class StudentDAO {
     }
 
     public Student getStudentByCode(String studentCode) {
-        String sql = "SELECT * FROM students WHERE student_code = ?";
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.student_code = ? AND u.role = 'STUDENT'";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentCode);
             ResultSet rs = pstmt.executeQuery();
@@ -54,12 +55,26 @@ public class StudentDAO {
     }
 
     public Student getStudentById(int userId) {
-        String sql = "SELECT * FROM students WHERE user_id = ?";
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.user_id = ? AND u.role = 'STUDENT'";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return extractStudentFromResultSet(rs);
+                Student student = extractStudentFromResultSet(rs);
+                
+                // Load classroom information if class_id > 0
+                if (student.getClassroomId() > 0) {
+                    try {
+                        ClassroomDAO classroomDAO = new ClassroomDAO();
+                        student.setClassroom(classroomDAO.getClassroomById(student.getClassroomId()));
+                    } catch (Exception e) {
+                        System.out.println("Error loading classroom for student " + userId + ": " + e.getMessage());
+                    }
+                }
+                
+                return student;
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -67,12 +82,31 @@ public class StudentDAO {
         return null;
     }
 
+    public Student getStudentByUserId(int userId) {
+        return getStudentById(userId);
+    }
+
     public List<Student> getAllStudents() {
-        String sql = "SELECT * FROM students";
+        String sql = "SELECT s.*, c.class_name, u.role " +
+                    "FROM students s " +
+                    "LEFT JOIN classrooms c ON s.class_id = c.class_id " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE u.role = 'STUDENT'";
         List<Student> students = new ArrayList<>();
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql); ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
-                students.add(extractStudentFromResultSet(rs));
+                Student student = extractStudentFromResultSet(rs);
+                
+                // Set classroom name directly from JOIN result
+                String className = rs.getString("class_name");
+                if (className != null && student.getClassroomId() > 0) {
+                    // Create a simple classroom object with just the name
+                    citd.nhom99.ck.model.Classroom classroom = new citd.nhom99.ck.model.Classroom(
+                        student.getClassroomId(), className, 0);
+                    student.setClassroom(classroom);
+                }
+                
+                students.add(student);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -81,7 +115,47 @@ public class StudentDAO {
     }
 
     public void updateStudent(User student) {
-        System.out.println("DAO: Update student" + student.toString());
+        // Update user information first
+        userDAO.updateUser(student);
+        
+        // Update student-specific information if needed
+        String sql = "UPDATE students SET student_code = ? WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, Helper.codeGenerate(student.getUserId(), student.getRole()));
+            pstmt.setInt(2, student.getUserId());
+            
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("DAO: Updated student " + student.getUserId());
+            } else {
+                System.out.println("DAO: No student found with ID " + student.getUserId());
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("DAO: Error updating student: " + e.getMessage());
+        }
+    }
+    
+    public void updateStudentClassroom(int studentId, int classroomId) {
+        String sql = "UPDATE students SET class_id = ? WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, classroomId);
+            pstmt.setInt(2, studentId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("DAO: Updated classroom for student " + studentId + " to classroom " + classroomId);
+            } else {
+                System.out.println("DAO: No student found with ID " + studentId);
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("DAO: Error updating student classroom: " + e.getMessage());
+        }
     }
 
     public void deleteStudent(int userId) {
@@ -93,9 +167,30 @@ public class StudentDAO {
         student.setUser(userDAO.getUserById(rs.getInt("user_id")));
         student.setStudentCode(rs.getString("student_code"));
         student.setStudentGradeId(rs.getInt("grade_id"));
-        ClassroomDAO classroomDAO = new ClassroomDAO();
-        student.setClassroom(classroomDAO.getClassroomById(rs.getInt("class_id")));
+        student.setClassroomId(rs.getInt("class_id"));
+        
+        // Load student grade information
+        if (rs.getInt("grade_id") > 0) {
+            student.setStudentGrade(studentGradeDAO.getStudentGradeById(rs.getInt("grade_id")));
+        }
 
         return student;
+    }
+    
+    // Method to get student without loading classroom (used by ClassroomDAO to avoid circular dependency)
+    public Student getStudentByIdWithoutClassroom(int userId) {
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.user_id = ? AND u.role = 'STUDENT'";
+        try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractStudentFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 }

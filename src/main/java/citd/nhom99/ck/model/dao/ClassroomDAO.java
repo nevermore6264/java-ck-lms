@@ -1,13 +1,17 @@
 package citd.nhom99.ck.model.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import citd.nhom99.ck.config.DBConfig;
 import citd.nhom99.ck.model.Classroom;
 import citd.nhom99.ck.model.Student;
-import citd.nhom99.ck.utils.QueryHelper;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import citd.nhom99.ck.model.Teacher;
 
 public class ClassroomDAO {
 
@@ -68,25 +72,48 @@ public class ClassroomDAO {
     }
 
     private Classroom extractClassroomFromResultSet(ResultSet rs) throws SQLException {
-
         int classId = rs.getInt("class_id");
         String className = rs.getString("class_name");
         int gvcnId = rs.getInt("gvcn_id");
 
-        return new Classroom(classId, className, gvcnId);
+        Classroom classroom = new Classroom(classId, className, gvcnId);
+        
+        // Load teacher information if gvcnId > 0
+        if (gvcnId > 0) {
+            try {
+                Teacher teacher = teacherDAO.getTeacherById(gvcnId);
+                classroom.setTeacher(teacher);
+            } catch (Exception e) {
+                System.out.println("Error loading teacher for classroom " + classId + ": " + e.getMessage());
+            }
+        }
+        
+        // Load students for this classroom
+        try {
+            List<Student> students = getStudentsForClassroom(String.valueOf(classId));
+            classroom.setStudents(students);
+        } catch (Exception e) {
+            System.out.println("Error loading students for classroom " + classId + ": " + e.getMessage());
+            classroom.setStudents(new ArrayList<>());
+        }
+
+        return classroom;
     }
 
     public void updateClassroom(Classroom classroom) {
-//        String sql = "UPDATE classrooms SET class_name = ?, gvcn_id = ? WHERE class_id = ?";
-//        try (Connection conn = DBConfig.getConnection();
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//            pstmt.setString(1, classroom.getClassName());
-//            pstmt.setString(2, classroom.getTeacherId());
-//            pstmt.setString(3, classroom.getClassId());
-//            pstmt.executeUpdate();
-//        } catch (SQLException e) {
-//            System.out.println(e.getMessage());
-//        }
+        String sql = "UPDATE classrooms SET class_name = ?, gvcn_id = ? WHERE class_id = ?";
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classroom.getClassName());
+            pstmt.setInt(2, classroom.getTeacherId());
+            pstmt.setInt(3, classroom.getClassId());
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("DEBUG: Updated " + rowsAffected + " rows for classroom " + classroom.getClassId());
+        } catch (SQLException e) {
+            System.out.println("Error updating classroom: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to update classroom: " + e.getMessage(), e);
+        }
     }
 
     public void deleteClassroom(String classroomId) {
@@ -100,19 +127,62 @@ public class ClassroomDAO {
         }
     }
 
-    private ArrayList<Student> getStudentsForClassroom(String classId) {
-        String sql = "SELECT s.* FROM students s JOIN classroom_student cs ON s.user_id = cs.student_user_id WHERE cs.class_id = ?";
-        ArrayList<Student> students = new ArrayList<>();
+    private List<Student> getStudentsForClassroom(String classId) {
+        String sql = "SELECT s.*, u.role FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE s.class_id = ? AND u.role = 'STUDENT'";
+        List<Student> students = new ArrayList<>();
         try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                students.add(studentDAO.getStudentByCode(rs.getString("student_code")));
+                // Use method that doesn't load classroom to avoid circular dependency
+                Student student = studentDAO.getStudentByIdWithoutClassroom(rs.getInt("user_id"));
+                if (student != null) {
+                    students.add(student);
+                }
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error loading students for classroom " + classId + ": " + e.getMessage());
         }
         return students;
+    }
+    
+    // Method to check for data inconsistencies
+    public void checkDataConsistency() {
+        String sql = "SELECT s.user_id, s.student_code, u.role " +
+                    "FROM students s " +
+                    "LEFT JOIN users u ON s.user_id = u.user_id " +
+                    "WHERE u.role IS NULL OR u.role != 'STUDENT'";
+        
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            System.out.println("=== Data Consistency Check ===");
+            boolean hasInconsistencies = false;
+            
+            while (rs.next()) {
+                hasInconsistencies = true;
+                int userId = rs.getInt("user_id");
+                String studentCode = rs.getString("student_code");
+                String role = rs.getString("role");
+                
+                System.out.println("Inconsistent data found:");
+                System.out.println("  - Student ID: " + userId);
+                System.out.println("  - Student Code: " + studentCode);
+                System.out.println("  - User Role: " + (role == null ? "NULL (user not found)" : role));
+                System.out.println("  - Issue: Student record exists but user is not a STUDENT");
+                System.out.println();
+            }
+            
+            if (!hasInconsistencies) {
+                System.out.println("No data inconsistencies found. All student records have valid user records with STUDENT role.");
+            }
+            
+        } catch (SQLException e) {
+            System.out.println("Error checking data consistency: " + e.getMessage());
+        }
     }
 }

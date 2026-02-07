@@ -1,7 +1,7 @@
 package citd.nhom99.ck.controller;
 
-import citd.nhom99.ck.model.dao.UserDAO;
 import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.dao.UserDAO;
 import citd.nhom99.ck.view.DashboardFrame;
 import citd.nhom99.ck.view.LoginFrame;
 
@@ -33,5 +33,10 @@ public class AppController {
     public void logout() {
         dashboardFrame.dispose();
         start();
+    }
+
+    public void updateUser(User user) {
+        userDAO.updateUser(user);
+        System.out.println("Controller: Updated user " + user.getUsername());
     }
 }

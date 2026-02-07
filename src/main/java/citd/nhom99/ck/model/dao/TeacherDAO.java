@@ -1,18 +1,17 @@
 package citd.nhom99.ck.model.dao;
 
-import citd.nhom99.ck.config.DBConfig;
-import citd.nhom99.ck.model.constant.Role;
-import citd.nhom99.ck.model.Teacher;
-import citd.nhom99.ck.model.User;
-import citd.nhom99.ck.utils.Helper;
-import citd.nhom99.ck.utils.QueryHelper;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import citd.nhom99.ck.config.DBConfig;
+import citd.nhom99.ck.model.Teacher;
+import citd.nhom99.ck.model.User;
+import citd.nhom99.ck.model.constant.Role;
+import citd.nhom99.ck.utils.Helper;
 
 public class TeacherDAO {
     private final UserDAO userDAO = new UserDAO();
@@ -58,9 +57,23 @@ public class TeacherDAO {
     }
 
     public Teacher getTeacherById(int teacherId) {
-        String sql = "SELECT * FROM teachers WHERE teacher_code = ?";
+        String sql = "SELECT * FROM teachers WHERE user_id = ?";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, teacherId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return extractTeacherFromResultSet(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting teacher by ID " + teacherId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Teacher getTeacherByUserId(int userId) {
+        String sql = "SELECT * FROM teachers WHERE user_id = ?";
+        try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return extractTeacherFromResultSet(rs);
@@ -87,10 +100,11 @@ public class TeacherDAO {
     public void updateTeacher(Teacher teacher) {
         userDAO.updateUser(teacher.getUser());
 
-        String sql = "UPDATE teachers SET subject_id = ? WHERE teacher_code = ?";
+        String sql = "UPDATE teachers SET subject_id = ?, classroom_id = ? WHERE teacher_code = ?";
         try (Connection conn = DBConfig.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, teacher.getSubjectId());
-            pstmt.setString(2, teacher.getTeacherCode());
+            pstmt.setInt(2, teacher.getClassroomId());
+            pstmt.setString(3, teacher.getTeacherCode());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -106,6 +120,7 @@ public class TeacherDAO {
         teacher.setTeacherCode(rs.getString("teacher_code"));
         teacher.setUser(userDAO.getUserById(rs.getInt("user_id")));
         teacher.setSubjectId(rs.getInt("subject_id"));
+        teacher.setClassroomId(rs.getInt("classroom_id"));
 
         return teacher;
     }
